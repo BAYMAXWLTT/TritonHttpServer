@@ -36,7 +36,14 @@ void start_httpd(unsigned short port, string doc_root)
 		DiewithMessage("Called bind(): socket binding failed"); /*bind socket failed*/
 	}
 
-	if(listen(servSocket, ))
+	if(listen(servSocket, CONNECTION_SIZE) < 0){ /*CONNECTION_SIZE can be found in server_utils*/
+		DiewithMessage("Called listen(): listen failed"); /*listen on socket failed*/
+	}
+
+	while(true){
+		/*Server loop to handle incoming request*/
+
+	}
 
 
 
