@@ -7,3 +7,7 @@ Starter code copyright (c) 2017, 2018 George Porter.  All Rights Reserved.
 ## To build
 
 make
+
+## Author
+Team: Baba
+Name: Hou Wang
