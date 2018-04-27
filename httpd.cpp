@@ -43,7 +43,21 @@ void start_httpd(unsigned short port, string doc_root)
 	while(true){
 		/*Server loop to handle incoming request*/
 
-	}
+		/* Set the size of the in-out parameter */
+		clntLen = sizeof(echoClntAddr);
+
+		/* Wait for a client to connect */
+		if ((clntSock = accept(servSock, (sockaddr *) &echoClntAddr,
+												 &clntLen)) < 0)
+			DiewithMessage("accept() failed");
+
+		/* clntSock is connected to a client! */
+
+		cerr << "Handling client " + inet_ntoa(echoClntAddr.sin_addr) << '\n';
+
+		/*Concurrrency: create thread pool to handle request*/
+		HandleTCPClient(clntSock);
+}
 
 
 
