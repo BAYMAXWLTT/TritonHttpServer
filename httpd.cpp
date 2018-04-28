@@ -1,3 +1,14 @@
+/******************************************************************************************
+Project: UCSD CSE291C Course Project: Web Server for TritonHTTP
+
+Author:
+1. Hou Wang
+
+httpd.cpp:
+Concurrency:
+implementation of server start up, creating thread pool.
+*******************************************************************************************/
+
 #include <iostream>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -5,19 +16,19 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "httpd.h"
-#include "server_utils.hpp"
+#include "diewithmessage.hpp"
+#include "handleTCPClient.hpp"
 
 using namespace std;
 
 void start_httpd(unsigned short port, string doc_root)
 {
 	int servSocket; /*set server socket fd*/
-	int clntSocket; /*set client socket fd*/
 	const string root = doc_root; /*Set the document serving root*/
 	sockaddr_in echoServAddr; /*Local IP address*/
-	sockaddr_in echoClntAddr; /*Client IP address*/
 	unsigned short serverPort = (port); /*set server port*/
-	unsigned int clntLen; /*Length of client address*/
+	pthread_t pid[POOL_SIZE]; /*Initiate threads id for pool*/
+	ThreadArgs *args = new ThreadArgs;
 
 	cerr << "Starting server (port: " << port <<
 		", doc_root: " << doc_root << ")" << endl;
@@ -40,25 +51,27 @@ void start_httpd(unsigned short port, string doc_root)
 		DiewithMessage("Called listen(): listen failed"); /*listen on socket failed*/
 	}
 
-	while(true){
-		/*Server loop to handle incoming request*/
+	/* Implement basic root check policy*/
+	// Code here:
 
-		/* Set the size of the in-out parameter */
-		clntLen = sizeof(echoClntAddr);
+	args->servSocket = servSocket;
+	args->doc_root = doc_root;
+	/*Initiate a thread pool, specified by POOL_SIZE*/
+	for(unsigned i = 0; i < POOL_SIZE; i++){
+		//create running process
+		if(pthread_create(&pid[i], NULL, &HandleTCPClient, args) < 0){
+			DiewithMessage("Called pthread_create(): threads creation failed");
+		}
+	}
 
-		/* Wait for a client to connect */
-		if ((clntSock = accept(servSock, (sockaddr *) &echoClntAddr,
-												 &clntLen)) < 0)
-			DiewithMessage("accept() failed");
+	cerr << "Starting server (port: " << port <<
+		", doc_root: " << doc_root << ")" << endl;
 
-		/* clntSock is connected to a client! */
-
-		cerr << "Handling client " + inet_ntoa(echoClntAddr.sin_addr) << '\n';
-
-		/*Concurrrency: create thread pool to handle request*/
-		HandleTCPClient(clntSock);
-}
-
-
-
+	for(unsigned i = 0; i < POOL_SIZE; i++){
+		/*Block main process until threads join*/
+		if(pthread_join(pid[i], NULL) < 0){
+			DiewithMessage("Called pthread_join(): threads join failed");
+		}
+	}
+	/*Not reachable*/
 }
