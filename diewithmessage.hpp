@@ -18,6 +18,5 @@ const unsigned CONNECTION_SIZE = 20;
 const unsigned POOL_SIZE = 10;
 
 void DiewithMessage(string msg);
-void *ThreadsinPool(void *args);
 
 #endif // HTTPD_H

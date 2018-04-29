@@ -13,6 +13,7 @@ implementation of server start up, creating thread pool.
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "httpd.h"
@@ -37,6 +38,14 @@ void start_httpd(unsigned short port, string doc_root)
 		DiewithMessage("Called socket(): Socket create failed"); /*socket creation failed*/
 	}
 
+	/* set socket receive timeout */
+	timeval *timeOutVal;
+	timeOutVal->tv_sec = 5;
+	timeOutVal->tv_usec = 0;
+	if(setsockopt(servSocket, SOL_SOCKET, SO_RCVTIMEO, static_cast<void *>(timeOutVal), sizeof(timeOutVal)) < 0){
+		DiewithMessage("Called setsockopt(): socket option set failed"); /*socket creation failed*/
+	}
+
 	/* Construct local address structure */
     memset(&echoServAddr, 0, sizeof(echoServAddr));   /* Zero out structure */
     echoServAddr.sin_family = AF_INET;                /* Internet address family */
@@ -50,9 +59,6 @@ void start_httpd(unsigned short port, string doc_root)
 	if(listen(servSocket, CONNECTION_SIZE) < 0){ /*CONNECTION_SIZE can be found in server_utils*/
 		DiewithMessage("Called listen(): listen failed"); /*listen on socket failed*/
 	}
-
-	/* Implement basic root check policy*/
-	// Code here:
 
 	args->servSocket = servSocket;
 	args->doc_root = doc_root;

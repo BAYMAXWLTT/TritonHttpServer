@@ -10,7 +10,7 @@
 using namespace std;
 
 void *HandleTCPClient(void *args){
-      ThreadArgs arg = static_cast<ThreadArgs *>(args);
+      ThreadArgs *arg = static_cast<ThreadArgs *>(args);
       int servSock = arg->servSocket;
       string doc_root = arg->doc_root;
       unsigned int clntLen; /*Length of client address*/
@@ -21,9 +21,10 @@ void *HandleTCPClient(void *args){
   		/* Set the size of the in-out parameter */
   		clntLen = sizeof(echoClntAddr);
 
-  		/* Wait for a client to connect */
-  		if ((clntSock = accept(servSock, (sockaddr *) &echoClntAddr, &clntLen)) < 0)
+  		/* Wait for a client to connect, verify if there is a timeout*/
+  		if ((clntSock = accept(servSock, (sockaddr *) &echoClntAddr, &clntLen)) < 0){
   			DiewithMessage("accept() failed");
+      }
 
   		/* clntSock is connected to a client! */
 
@@ -37,5 +38,10 @@ void *HandleTCPClient(void *args){
 }
 
 void HandleReq(int clntSock, string doc_root){
+  /* P1: Implement basic root check policy, avoid client from accessing unauthorized path*/
+  // Code here:
+
+  /* P2: */
+
 
 }
