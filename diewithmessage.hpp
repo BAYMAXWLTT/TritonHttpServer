@@ -12,8 +12,6 @@ implementation of server start up, creating thread pool.
 
 #include <string>
 
-using namespace std;
-
 const unsigned CONNECTION_SIZE = 20;
 const unsigned POOL_SIZE = 10;
 

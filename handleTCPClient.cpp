@@ -1,3 +1,16 @@
+/******************************************************************************************
+Project: UCSD CSE291C Course Project: Web Server for TritonHTTP
+
+Author:
+1. Hou Wang
+
+handTCPClient:
+This module handles incoming connection, and message parsing and framing.
+Handle error in data format level.
+
+Data in valid format will be passed to responser for content verification and response
+*******************************************************************************************/
+
 #include <iostream>
 #include <stdlib>
 #include <sys/socket.h>
@@ -5,6 +18,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "handleTCPClient.hpp"
+#include "framer.hpp"
+#include "parser.hpp"
 #include "diewithmessage.hpp"
 
 using namespace std;
@@ -21,27 +36,80 @@ void *HandleTCPClient(void *args){
   		/* Set the size of the in-out parameter */
   		clntLen = sizeof(echoClntAddr);
 
-  		/* Wait for a client to connect, verify if there is a timeout*/
+      /* clntSock is connected to a client! */
   		if ((clntSock = accept(servSock, (sockaddr *) &echoClntAddr, &clntLen)) < 0){
   			DiewithMessage("accept() failed");
       }
 
-  		/* clntSock is connected to a client! */
+      /* set socket receive timeout */
+      timeval *timeOutVal;
+      timeOutVal->tv_sec = 5;
+      timeOutVal->tv_usec = 0;
+      if(setsockopt(clntSock, SOL_SOCKET, SO_RCVTIMEO, static_cast<void *>(timeOutVal), sizeof(timeOutVal)) < 0){
+        DiewithMessage("Called setsockopt(): socket option set failed"); /*socket creation failed*/
+      }
 
   		cerr << "Handling client " + inet_ntoa(echoClntAddr.sin_addr) << '\n';
 
       /* Start Request Handling Process*/
   		HandleReq(clntSock, doc_root);
-
-      /* Produce Response*/
     }
 }
 
 void HandleReq(int clntSock, string doc_root){
-  /* P1: Implement basic root check policy, avoid client from accessing unauthorized path*/
-  // Code here:
+  /* P1: Framing and Parsing incoming bytes, parse into a request data structure*/
+  /* Handle timeout error */
+  char buffer[BUFSIZE];
+  memset(buffer, 0, sizeof(buffer));
+  Framer framer;
+  Parser parser;
+  ssize_t numBytesRcvd;
 
-  /* P2: */
+  if((numBytesRcvd = recv(clntSock, buffer, BUFSIZE, 0)) < 0){
+    /* Insert handle timeout error response */
+    close(clntSock);
+    return;
+  }
+
+  while(!parser.isTerminated()){
+    /* if connection:closed not detect */
+
+    while(numBytesRcvd > 0){
+      string input(buffer, numBytesRcvd);
+      framer.append(input);
+
+      while(framer.hasMessage()){
+          string msg;
+          msg = framer.topMessage();
+          framer.popMessage();
+          if(!parser.parse(msg)){
+            /* Insert handle invalid header error response */
+            close(clntSock);
+            return;
+          }
+      }
+
+      memset(buffer, 0, sizeof(buffer));
+      if((numBytesRcvd = recv(clntSock, buffer, BUFSIZE, 0)) < 0){
+        /* Insert Handle timeout error response*/
+        close(clntSock);
+        return;
+      }
+    }
+
+    /* Produce response based on header provided*/
+    
+  }
+
+  /* Connection: close detected, close socket and return */
+  close(clntSock);
+  return;
+
+
+  // handle reponse based on request data structure
+  /* P2: Implement basic URL check policy, avoid client from accessing unauthorized path */
+  /* Check host, connection, METHOD, HTTP Version Check */
+  /* P3: response with ERROR, response, response with body*/
 
 
 }

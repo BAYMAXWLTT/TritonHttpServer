@@ -1,9 +1,9 @@
 #include "CalcStateMachine.hpp"
-#include "CalcParser.hpp"
+#include "parser.hpp"
 #include <cstdint>
 #include <iostream>
 
-uint64_t CalcStateMachine::update(CalcInstruction instr){
+uint64_t CalcStateMachine::update(HttpInstruction instr){
     switch(instr.calcInstr){
       case Instruction::ADD:
         val += instr.val;

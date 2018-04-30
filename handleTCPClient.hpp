@@ -10,11 +10,11 @@ implementation of server start up, creating thread pool.
 #ifndef HANDLETCPCLIENT_HPP
 #define HANDLETCPCLIENT_HPP
 
-struct ThreadArgs{
-	int servSocket;
-	string doc_root;
-}
+#include <string>;
 
+const unsigned BUFSIZE = 4096;
 void *HandleTCPClient(void *args);
+
+
 
 #endif // HTTPD_H

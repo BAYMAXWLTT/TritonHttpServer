@@ -2,12 +2,10 @@
 #define CALCFSTATEMACHINE_HPP
 
 #include <cstdint>
-#include <vector>
-#include "CalcParser.hpp"
 
 class CalcStateMachine {
 public:
-  uint64_t update(CalcInstruction instr);
+  uint64_t update(HttpInstruction instr);
 
 protected:
 	// PUT ANY FIELDS/STATE HERE
