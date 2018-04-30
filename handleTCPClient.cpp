@@ -12,7 +12,7 @@ Data in valid format will be passed to responser for content verification and re
 *******************************************************************************************/
 
 #include <iostream>
-#include <stdlib>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -20,6 +20,7 @@ Data in valid format will be passed to responser for content verification and re
 #include "handleTCPClient.hpp"
 #include "framer.hpp"
 #include "parser.hpp"
+#include "responder.hpp"
 #include "diewithmessage.hpp"
 
 using namespace std;
@@ -63,17 +64,18 @@ void HandleReq(int clntSock, string doc_root){
   memset(buffer, 0, sizeof(buffer));
   Framer framer;
   Parser parser;
+  Responder responder(clntSock, doc_root);
   ssize_t numBytesRcvd;
 
   if((numBytesRcvd = recv(clntSock, buffer, BUFSIZE, 0)) < 0){
     /* Insert handle timeout error response */
+    responder.sendResponse(CLIENT_ERROR);
     close(clntSock);
     return;
   }
 
   while(!parser.isTerminated()){
     /* if connection:closed not detect */
-
     while(numBytesRcvd > 0){
       string input(buffer, numBytesRcvd);
       framer.append(input);
@@ -84,6 +86,7 @@ void HandleReq(int clntSock, string doc_root){
           framer.popMessage();
           if(!parser.parse(msg)){
             /* Insert handle invalid header error response */
+            responder.sendResponse(CLIENT_ERROR);
             close(clntSock);
             return;
           }
@@ -92,24 +95,18 @@ void HandleReq(int clntSock, string doc_root){
       memset(buffer, 0, sizeof(buffer));
       if((numBytesRcvd = recv(clntSock, buffer, BUFSIZE, 0)) < 0){
         /* Insert Handle timeout error response*/
+        responder.sendResponse(CLIENT_ERROR);
         close(clntSock);
         return;
       }
     }
 
     /* Produce response based on header provided*/
-    
+    int status = responder.verifyandAppendReq(parser.getReqHeader());
+    responder.sendResponse(status);
   }
 
   /* Connection: close detected, close socket and return */
   close(clntSock);
   return;
-
-
-  // handle reponse based on request data structure
-  /* P2: Implement basic URL check policy, avoid client from accessing unauthorized path */
-  /* Check host, connection, METHOD, HTTP Version Check */
-  /* P3: response with ERROR, response, response with body*/
-
-
 }

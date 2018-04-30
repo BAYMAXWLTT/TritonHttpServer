@@ -15,35 +15,35 @@ typedef struct HttpInstruction_t {
 } HttpInstruction;
 
 class Parser {
-public:
-	/*
-		Constructor, initialize private fields
-	*/
-	Parser();
+	private:
+		HttpInstruction _req;
+		bool _isTerminated;
 
-	/*
-		Parse string into valid header
-		Return: true, if string contains valid header; otherwise false
-	*/
-	bool parse(string insstr);
+	public:
+		/*
+			Constructor, initialize private fields
+		*/
+		Parser();
 
-	/*
-		Return currently parsed http headers
-	*/
-	HttpInstruction getReqHeader(){
-		return _req;
-	}
+		/*
+			Parse string into valid header
+			Return: true, if string contains valid header; otherwise false
+		*/
+		bool parse(string insstr);
 
-	/*
-		Return if connection needs to be terminated by client
-	*/
-	bool isTerminated(){
-		return _isTerminated;
-	}
+		/*
+			Return currently parsed http headers
+		*/
+		HttpInstruction getReqHeader(){
+			return _req;
+		}
 
-private:
-	HttpInstruction _req;
-	bool _isTerminated;
+		/*
+			Return if connection needs to be terminated by client
+		*/
+		bool isTerminated(){
+			return _isTerminated;
+		}
 };
 
 #endif // CALCPARSER_HPP

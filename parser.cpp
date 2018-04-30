@@ -7,11 +7,11 @@ Author:
 Verify the header format and parse the request into valid request data structure
 *******************************************************************************************/
 
-// #include <assert.h>
 #include <string>
-// #include <algorithm>
 #include <iostream>
 #include <vector>
+#include "httpd.h"
+#include "responder.hpp"
 #include "parser.hpp"
 
 using namespace std;
@@ -41,13 +41,26 @@ bool Parser::parse(string insstr){
 		if(key_val[0].compare("GET") != 0){
 			return false;
 		}
-		_ret.url = key_val[1];
+
+		/* Path overwrite for "/" default to index.html*/
+		_req.url = key_val[1];
+		if(_req.url == "/"){
+			_req.url = "/index.html";
+		}
+
 		string http = strtok(key_val[2], "\\");
 		if(http.compare("HTTP") != 0){
 			// if HTTP version is not correctly formed
 			return false;
 		}
 		_req.http_ver = stof(strtok(NULL, "\\"));
+
+		/*
+			verify http version is supported
+		*/
+		if(_req.http_ver > HTTP_VER_UPPER){
+			return CLIENT_ERROR;
+		}
 	}else if(key_val.size() == 2){
 		/*
 			This is the "key: val" pair
@@ -60,7 +73,8 @@ bool Parser::parse(string insstr){
 			_req.host = val;
 		}else if(key.compare("Connection") == 0){
 			_req.connection = val;
-			_isTerminated = true;
+			if(val.compare("close") == 0){}
+				_isTerminated = true;
 		}else{
 			/* Not supoprted headers */
 			return false;

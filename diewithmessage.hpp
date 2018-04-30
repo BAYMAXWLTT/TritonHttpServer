@@ -12,9 +12,6 @@ implementation of server start up, creating thread pool.
 
 #include <string>
 
-const unsigned CONNECTION_SIZE = 20;
-const unsigned POOL_SIZE = 10;
-
-void DiewithMessage(string msg);
+void DiewithMessage(std::string msg);
 
 #endif // HTTPD_H

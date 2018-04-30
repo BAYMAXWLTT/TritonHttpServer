@@ -28,7 +28,7 @@ void start_httpd(unsigned short port, string doc_root)
 	int servSocket; /*set server socket fd*/
 	const string root = doc_root; /*Set the document serving root*/
 	sockaddr_in echoServAddr; /*Local IP address*/
-	unsigned short serverPort = (port); /*set server port*/
+	unsigned short echoServPort = port; /*set server port*/
 	pthread_t pid[POOL_SIZE]; /*Initiate threads id for pool*/
 	ThreadArgs *args = new ThreadArgs;
 
@@ -61,6 +61,7 @@ void start_httpd(unsigned short port, string doc_root)
 		if(pthread_create(&pid[i], NULL, &HandleTCPClient, args) < 0){
 			DiewithMessage("Called pthread_create(): threads creation failed");
 		}
+		cerr << "Thread " << pid[i] << "is spawned \n";
 	}
 
 	cerr << "Starting server (port: " << port <<
