@@ -1,7 +1,9 @@
 #include <string>
+#include <cstring>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <ctime>
 #include <unistd.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -26,10 +28,10 @@ using namespace std;
 int Responder::checkFile(string path){
   string absolutePath = this->doc_root + path;
   string resolvedPath;
-  realpath(absolutePath, &resolvedPath[0]);
+  realpath(&absolutePath[0], &resolvedPath[0]);
 
   if(resolvedPath.find(this->doc_root) != string::npos){
-    if((this->fd = open(&resolvedPath[0], O_RDONLY)) < 0){
+    if((this->fd = open(static_cast<char *>(&resolvedPath[0]), O_RDONLY)) < 0){
       // file open error
       switch(errno){
         case EACCES:
@@ -114,7 +116,8 @@ void Responder::appendInitLine(vector<char> &sendQ, int statCode){
   }
 
   resInitLine += DELIMITER;
-  sendQ.insert(sendQ.end(), resInitLine.begin(), resInitLine.end());
+  vector<char> res(resInitLine.begin(), resInitLine.end());
+  sendQ = res;
 }
 
 void Responder::appendContentType(vector<char> &sendQ, FileType type){
@@ -133,40 +136,68 @@ void Responder::appendContentType(vector<char> &sendQ, FileType type){
       cnt_type += CONTENT_TXT;
   }
   cnt_type += DELIMITER;
-  sendQ.insert(cnt_type.begin(), cnt_type.end());
+  vector<char> res(cnt_type.begin(), cnt_type.end());
+  sendQ = res;
 }
 
 void Responder::appendContentLength(vector<char> &sendQ, off_t size){
   int fs_size = (int)size;
   string sz = CONTENT_LEN + to_string(fs_size);
   sz += DELIMITER;
-  sendQ.insert(sz.begin(), sz.end());
+  vector<char> res(sz.begin(), sz.end());
+  sendQ = res;
 }
 
-void Responder::appendLastModified(vector<char> &sendQ, time_t mtime){
+void Responder::appendLastModified(vector<char> &sendQ, time_t &mtime){
   /* Append Last-Modified*/
+  string lm = LAST_MOD;
+  /* temp format: Www MMM DD HH:MM:SS YYYY*/
+  string tm = ctime(&mtime);
+  char *temp_t= strtok(&tm[0], " ");
+  vector<string> token;
+
+  while(temp_t != NULL){
+      string temp(temp_t);
+      token.push_back(temp);
+      temp_t = strtok(NULL, " ");
+  }
+  /* Reformat the time string */
+  lm += token[0] + ", " + token[2] + " " + token[1] + " " + token[3] + " " + token[4] + "GMT";
+  lm += DELIMITER;
+  vector<char> res(lm.begin(), lm.end());
+  sendQ = res;
+}
+
+void Responder::appendServ(vector<char> sendQ, string serv){
+  /* Append server version to header*/
+  string sv = SERVER;
+  sv += serv;
+  sv += DELIMITER;
+  vector<char> res(sv.begin(), sv.end());
+  sendQ = res;
 }
 
 void Responder::response(int statCode, int fd, FileType type){
   off_t offset = 0;
   const int BUFSIZE = 4096;
   vector<char> sendQ;
-
+  struct stat fileStat;
+  fstat(fd, &fileStat);
   // add HTTP response initial line
   appendInitLine(sendQ, statCode);
+
+  /* Append Last modified*/
+  appendLastModified(sendQ, fileStat.st_mtime);
 
   /* Append Content-Type*/
   appendContentType(sendQ, type);
 
   /* Append Content-Length*/
-  stat fileStat;
-  fstat(fd, &fileStat);
   appendContentLength(sendQ, fileStat.st_size);
 
-  /* Append Last modified*/
-  appendLastModified(sendQ, fileStat.st_mtime);
-
-  send(clntSock, (void *)&sendQ[0], sendQ.size());
+  /* Append Server Name*/
+  appendServ(sendQ, SERVER_VER_NAME);
+  send(clntSock, (void *)&sendQ[0], sendQ.size(), 0);
 
   /* Send File as body, until EOF */
   while(sendfile(clntSock, fd, &offset, BUFSIZE) > 0);
@@ -176,11 +207,9 @@ void Responder::response(int statCode, int fd, FileType type){
   Public methods:
 
 ************************************/
-
-
 int Responder::verifyandAppendReq(HttpInstruction req){
   // check if request object is valid
-  if(!req){
+  if(req.host.size() == 0){
     return CLIENT_ERROR;
   }
 
@@ -188,23 +217,26 @@ int Responder::verifyandAppendReq(HttpInstruction req){
 }
 
 void Responder::sendResponse(int status){
+  int frbid_fd;
+  int Fd_fd;
+  int clnt_fd;
   switch(status){
     case OK:
       response(status, this->fd, type);
     break;
 
     case FORBIDDEN: // 403 forbidden
-      int frbid_fd = openat(AT_FDCWD, FORBIDDEN_PATH);
+      frbid_fd = openat(AT_FDCWD, &FORBIDDEN_PATH[0], O_RDONLY);
       response(status, frbid_fd, TEXT);
     break;
 
     case NOT_FOUND: // 404 not found
-      int ntFd_fd = openat(AT_FDCWD, NOT_FOUND_PATH);
-      response(status, ntFd_fd, TEXT);
+      Fd_fd = openat(AT_FDCWD, &NOT_FOUND_PATH[0], O_RDONLY);
+      response(status, Fd_fd, TEXT);
     break;
 
     default: // 400 client error
-      int clnt_fd = openat(AT_FDCWD, CLIENT_ERROR_PATH);
+      clnt_fd = openat(AT_FDCWD, &CLIENT_ERROR_PATH[0], O_RDONLY);
       response(status, clnt_fd, TEXT);
   }
   return;

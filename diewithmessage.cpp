@@ -13,7 +13,7 @@ implementation of server start up, creating thread pool.
 #include <iostream>
 #include "diewithmessage.hpp"
 
-void DiewithMessage(string msg){
-  cerr << msg << '\n';
+void DiewithMessage(std::string msg){
+  std::cerr << msg << '\n';
   exit(1);
 }

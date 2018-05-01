@@ -8,6 +8,7 @@ Verify the header format and parse the request into valid request data structure
 *******************************************************************************************/
 
 #include <string>
+#include <cstring>
 #include <iostream>
 #include <vector>
 #include "httpd.h"
@@ -25,9 +26,10 @@ bool Parser::parse(string insstr){
 	// PUT YOUR CODE HERE
 	vector<string> key_val;
 	// insstr.erase(remove(insstr.begin(), insstr.end(), ' '), insstr.end());
-	string token = strtok(insstr, " ");
+	char *token = strtok(static_cast<char *>(&insstr[0]), " ");
 	while(token != NULL){
-			key_val.push_back(token);
+			string temp(token);
+			key_val.push_back(temp);
 			token = strtok(NULL, " ");
 	}
 
@@ -48,7 +50,8 @@ bool Parser::parse(string insstr){
 			_req.url = "/index.html";
 		}
 
-		string http = strtok(key_val[2], "\\");
+		char *http_t = strtok(static_cast<char *>(&key_val[2][0]), "\\");
+		string http(http_t);
 		if(http.compare("HTTP") != 0){
 			// if HTTP version is not correctly formed
 			return false;

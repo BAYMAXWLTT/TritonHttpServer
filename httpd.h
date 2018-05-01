@@ -4,6 +4,7 @@
 const unsigned CONNECTION_SIZE = 20;
 const unsigned POOL_SIZE = 10;
 const float HTTP_VER_UPPER = 1.1;
+const std::string SERVER_VER_NAME = "Baba/v1.0-dev";
 
 struct ThreadArgs{
 	int servSocket;

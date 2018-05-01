@@ -8,7 +8,6 @@ httpd.cpp:
 Concurrency:
 implementation of server start up, creating thread pool.
 *******************************************************************************************/
-
 #include <iostream>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,6 +16,8 @@ implementation of server start up, creating thread pool.
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <cstring>
+#include <string>
 #include "httpd.h"
 #include "diewithmessage.hpp"
 #include "handleTCPClient.hpp"
@@ -28,6 +29,7 @@ void start_httpd(unsigned short port, string doc_root)
 	int servSocket; /*set server socket fd*/
 	const string root = doc_root; /*Set the document serving root*/
 	sockaddr_in echoServAddr; /*Local IP address*/
+	sockaddr *echoServAddr_t;
 	unsigned short echoServPort = port; /*set server port*/
 	pthread_t pid[POOL_SIZE]; /*Initiate threads id for pool*/
 	ThreadArgs *args = new ThreadArgs;
@@ -45,7 +47,8 @@ void start_httpd(unsigned short port, string doc_root)
     echoServAddr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface */
     echoServAddr.sin_port = htons(echoServPort);      /* Local port */
 
-	if(bind(servSocket, (sockaddr *)echoServAddr, sizeof(echoServAddr)) < 0){
+	echoServAddr_t = (sockaddr *)&echoServAddr;
+	if(bind(servSocket, echoServAddr_t, sizeof(echoServAddr)) < 0){
 		DiewithMessage("Called bind(): socket binding failed"); /*bind socket failed*/
 	}
 

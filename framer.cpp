@@ -1,6 +1,7 @@
 #include <assert.h>
 #include "framer.hpp"
 #include <iostream>
+#include <string>
 using namespace std;
 
 void Framer::append(string chars)

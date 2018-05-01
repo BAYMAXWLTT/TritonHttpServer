@@ -24,6 +24,7 @@ const string HTTP = "HTTP/";
 const string CONTENT_TYPE = "Content-Type: ";
 const string CONTENT_LEN = "Content-Length: ";
 const string LAST_MOD = "Last-Modified: ";
+const string SERVER = "Server: ";
 const string CONTENT_TXT = "text/html";
 const string CONTENT_JPEG = "image/jpeg";
 const string CONTENT_PNG = "image/png";
@@ -32,7 +33,7 @@ enum FileType{
   TEXT,
   JPEG,
   PNG
-}
+};
 
 class Responder {
   private:
@@ -69,7 +70,9 @@ class Responder {
     void appendInitLine(vector<char> &sendQ, int statCode);
     void appendContentType(vector<char> &sendQ, FileType type);
     void appendContentLength(vector<char> &sendQ, off_t size);
-    void   appendLastModified(vector<char> &sendQ, time_t mtime);
+    void appendLastModified(vector<char> &sendQ, time_t &mtime);
+    void appendServ(vector<char> sendQ, string serv);
+
   public:
   	/*
   		Constructor, initialize private fields

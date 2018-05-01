@@ -17,6 +17,10 @@ Data in valid format will be passed to responser for content verification and re
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <unistd.h>
+#include <string>
+#include <cstring>
+#include "httpd.h"
 #include "handleTCPClient.hpp"
 #include "framer.hpp"
 #include "parser.hpp"
@@ -43,22 +47,23 @@ void *HandleTCPClient(void *args){
       }
 
       /* set socket receive timeout */
-      timeval *timeOutVal;
+      timeval *timeOutVal = new timeval;
       timeOutVal->tv_sec = 5;
       timeOutVal->tv_usec = 0;
       if(setsockopt(clntSock, SOL_SOCKET, SO_RCVTIMEO, static_cast<void *>(timeOutVal), sizeof(timeOutVal)) < 0){
         DiewithMessage("Called setsockopt(): socket option set failed"); /*socket creation failed*/
       }
 
-  		cerr << "Handling client " + inet_ntoa(echoClntAddr.sin_addr) << '\n';
+      string addr(inet_ntoa(echoClntAddr.sin_addr));
+  		cerr << "Handling client " + addr << '\n';
 
-      /* Start Request Handling Process*/
+      /* Start Request Handling Process */
   		HandleReq(clntSock, doc_root);
     }
 }
 
 void HandleReq(int clntSock, string doc_root){
-  /* P1: Framing and Parsing incoming bytes, parse into a request data structure*/
+  /* P1: Framing and Parsing incoming bytes, parse into a request data structure */
   /* Handle timeout error */
   char buffer[BUFSIZE];
   memset(buffer, 0, sizeof(buffer));
