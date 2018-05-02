@@ -37,7 +37,7 @@ int Responder::checkFile(string path){
 
 	cerr << resolvedPath << '\n';
 
-  if(resolvedPath.find(this->doc_root) == string::npos){
+  if(resolvedPath.find(this->doc_root) == resolvedPath.end()){
     return NOT_FOUND;
   }
 
