@@ -42,7 +42,7 @@ int Responder::checkFile(string path){
   if(pos == string::npos){
     return NOT_FOUND;
   }
-	cerr << this->fd << '\n';
+	// cerr << this->fd << '\n';
 	cerr << *filePath << '\n';
 	cerr << O_RDONLY << '\n';
 	this->fd = open(filePath, O_RDONLY);
