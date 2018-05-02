@@ -31,9 +31,9 @@ vector<string> Responder::parseHelper(string insstr, char del){
 
 int Responder::checkFile(string path){
 	// string root(this->doc_root);
-	string absolutePath(this->doc);
+	string absolutePath(this->doc_root);
 	int *res_file = &(this->fd);
-	cerr << root << '\n';
+	// cerr << root << '\n';
 	cerr << path << '\n';
 
 	// absolutePath.append(root);
