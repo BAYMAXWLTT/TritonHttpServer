@@ -123,7 +123,9 @@ void HandleReq(int clntSock, string doc_root){
   }
 
   /* Connection: close detected, close socket and return */
+  cerr << "reach out of loop" << '\n';
   delete buffer;
   close(clntSock);
+  cerr << "socket close" << '\n';
   return;
 }

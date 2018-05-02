@@ -17,5 +17,5 @@ void DiewithMessage(std::string msg){
 
 void DiewithMessage_t(std::string msg){
   std::cerr << msg <<'\n';
-  pthread_exit(1);
+  pthread_exit(NULL);
 }
