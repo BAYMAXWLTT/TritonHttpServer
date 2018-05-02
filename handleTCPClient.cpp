@@ -115,10 +115,10 @@ void HandleReq(int clntSock, string doc_root){
 
     /* Produce response based on header provided*/
     if(parser.isInstr()){
+      cerr << "parse" << '\n';
       int status = responder.verifyandAppendReq(parser.getReqHeader());
       responder.sendResponse(status);
     }
-    numBytesRcvd = 0;
   }
 
   /* Connection: close detected, close socket and return */

@@ -228,7 +228,7 @@ void Responder::response(int statCode){
   /* Send File as body, until EOF */
   // int count = fileStat.st_size;
   while(sendfile(clntSock, fd, &offset, BUFSIZE) > 0);
-	cerr << "finish sending file" << '\n';
+
 }
 
 /************************************
