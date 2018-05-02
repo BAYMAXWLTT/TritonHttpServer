@@ -151,7 +151,11 @@ void Responder::appendContentType(FileType type){
   this->sendQ += cnt_type;
 }
 
-void Responder::appendContentLength(struct stat f_stat){
+void Responder::appendContentLength(){
+  struct stat f_stat;
+  if(fstat(this->fd, &f_stat) < 0){
+    cerr << strerror(errno) << '\n';
+  }
   int fs_size = (int)f_stat.st_size;
   string sz = CONTENT_LEN + to_string(fs_size);
   sz += DELIMITER;
@@ -159,18 +163,22 @@ void Responder::appendContentLength(struct stat f_stat){
     this->sendQ += sz;
 }
 
-void Responder::appendLastModified(struct stat f_stat){
+void Responder::appendLastModified(){
   /* Append Last-Modified*/
   string lm = LAST_MOD;
+  struct stat f_stat;
+  if(fstat(this->fd, &f_stat) < 0){
+    cerr << strerror(errno) << '\n';
+  }
   /* temp format: Www MMM DD HH:MM:SS YYYY*/
-  cerr << lm << '\n';
-  time_t t = f_stat.st_mtime;
-  cerr << t << '\n';
-
+  // cerr << lm << '\n';
+  // time_t t = f_stat.st_mtime;
+  // cerr << t << '\n';
+  //
   // char gm[512];
   // struct tm* gmt;
   // gmt = gmtime(&t);
-  //
+  // //
   // strftime(gm, 512, "%a, %d %b %Y %T %Z", gmt);
   // string tim(gm);
   // lm += tim;
@@ -179,10 +187,10 @@ void Responder::appendLastModified(struct stat f_stat){
 
   /* Reformat the time string */
   // lm += token[0] + ", " + token[2] + " " + token[1] + " " + token[3] + " " + token[4] + "GMT";
-  lm += to_string(t);
+  // lm += to_string(t);
   lm += DELIMITER;
-    cerr << lm << '\n';
-    this->sendQ += lm;
+  cerr << lm << '\n';
+  this->sendQ += lm;
 }
 
 void Responder::appendServ(string serv){
@@ -197,32 +205,28 @@ void Responder::appendServ(string serv){
 void Responder::response(int statCode, int fd, FileType type){
   off_t offset = 0;
   const int BUFSIZE = 4096;
-  struct stat fileStat;
-
-  if(fstat(fd, &fileStat) < 0){
-    cerr << strerror(errno) << '\n';
-  }
+  // struct stat fileStat;
 
   // add HTTP response initial line
   appendInitLine(statCode);
 
   /* Append Last modified*/
-  cerr << "Last modified: " << fileStat.st_mtime <<'\n';
-  appendLastModified(fileStat);
+  // cerr << "Last modified: " << fileStat.st_mtime <<'\n';
+  appendLastModified();
 
   /* Append Content-Type*/
   appendContentType(type);
 
   /* Append Content-Length*/
-  appendContentLength(fileStat);
+  appendContentLength();
 
   /* Append Server Name*/
   appendServ(SERVER_VER_NAME);
   send(clntSock, (void *)&sendQ[0], sendQ.size(), 0);
 
   /* Send File as body, until EOF */
-  int count = fileStat.st_size;
-  while(sendfile(clntSock, fd, &offset, count) > 0);
+  // int count = fileStat.st_size;
+  while(sendfile(clntSock, fd, &offset, BUFSIZE) > 0);
   close(fd);
   sendQ = "";
 }
