@@ -45,8 +45,8 @@ int Responder::checkFile(string path){
 	// cerr << this->fd << '\n';
 	cerr << *filePath << '\n';
 	cerr << O_RDONLY << '\n';
-	this->fd = open(filePath, O_RDONLY);
-  if(Responder::fd < 0){
+	int filed = open(filePath, O_RDONLY);
+  if(filed < 0){
     // file open error
     switch(errno){
       case EACCES:
@@ -58,6 +58,7 @@ int Responder::checkFile(string path){
       return NOT_FOUND;
     }
   }
+	this->fd = filed;
 	cerr << this->fd <<'\n';
 	return 0;
 }
