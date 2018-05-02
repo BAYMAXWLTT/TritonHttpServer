@@ -39,11 +39,12 @@ int Responder::checkFile(string path){
 	char *filePath = &resolvedPath[0];
 
   size_t pos = resolvedPath.find(root);
-	cerr << pos << '\n';
   if(pos == string::npos){
     return NOT_FOUND;
   }
-
+	cerr << Responder::fd << '\n';
+	cerr << *filePath << '\n';
+	cerr << O_RDONLY << '\n';
 	Responder::fd = open(filePath, O_RDONLY);
   if(Responder::fd < 0){
     // file open error
