@@ -151,20 +151,21 @@ void Responder::appendContentType(FileType type){
   this->sendQ += cnt_type;
 }
 
-void Responder::appendContentLength(off_t size){
-  int fs_size = (int)size;
+void Responder::appendContentLength(struct stat f_stat){
+  int fs_size = (int)f_stat.st_size;
   string sz = CONTENT_LEN + to_string(fs_size);
   sz += DELIMITER;
   cerr << sz << '\n';
     this->sendQ += sz;
 }
 
-void Responder::appendLastModified(time_t *mtime){
+void Responder::appendLastModified(struct stat f_stat){
   /* Append Last-Modified*/
   string lm = LAST_MOD;
   /* temp format: Www MMM DD HH:MM:SS YYYY*/
   cerr << lm << '\n';
-  struct tm* gmt = gmtime(mtime);
+  time_t t = f_stat.st_mtime;
+  struct tm* gmt = gmtime(t);
   char gm[512];
   strftime(gm, 512, "%a, %d %b %Y %T %Z", gmt);
   string tim(gm);
@@ -202,13 +203,13 @@ void Responder::response(int statCode, int fd, FileType type){
 
   /* Append Last modified*/
   cerr << "Last modified: " << fileStat.st_mtime <<'\n';
-  appendLastModified(&fileStat.st_mtime);
+  appendLastModified(fileStat);
 
   /* Append Content-Type*/
   appendContentType(type);
 
   /* Append Content-Length*/
-  appendContentLength(fileStat.st_size);
+  appendContentLength(fileStat);
 
   /* Append Server Name*/
   appendServ(SERVER_VER_NAME);
