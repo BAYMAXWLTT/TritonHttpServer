@@ -104,7 +104,8 @@ void Responder::appendInitLine(int statCode){
   string resInitLine;
   /* Append HTTP/1.1 */
   resInitLine += HTTP + to_string(HTTP_VER_UPPER).substr(0, 3) + " ";
-  /* Append Status code */r<char> &sendQ,
+  /* Append Status code */
+
   resInitLine += to_string(statCode) + " ";
   /* Append description*/
   switch(statCode){
