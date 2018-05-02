@@ -45,7 +45,7 @@ int Responder::checkFile(string path){
   if(pos == string::npos){
     return NOT_FOUND;
   }
-
+	cerr << filePath << '\n';
 	int filed = open(filePath, O_RDONLY);
 	cerr << filed <<'\n';
   if(filed < 0){
