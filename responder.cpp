@@ -36,7 +36,7 @@ int Responder::checkFile(string path){
   string resolvedPath(resolved_t);
 
 	cerr << resolvedPath << '\n';
-
+	cerr << this->doc_root << '\n';
   size_t pos = resolvedPath.find(this->doc_root);
 	cerr << pos << '\n';
   if(pos == string::npos){
