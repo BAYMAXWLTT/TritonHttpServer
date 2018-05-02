@@ -32,22 +32,19 @@ vector<string> Responder::parseHelper(string insstr, char del){
 int Responder::checkFile(string path){
 	string root = this->doc_root;
   string absolutePath = root + path;
-		cerr << this->doc_root << '\n';
 
   char resolved_t[absolutePath.size()];
   realpath(&absolutePath[0], resolved_t);
   string resolvedPath(resolved_t);
+	char *filePath = &resolvedPath[0];
 
-	cerr << resolvedPath << '\n';
-
-	cerr << this->doc_root << '\n';
   size_t pos = resolvedPath.find(root);
 	cerr << pos << '\n';
   if(pos == string::npos){
     return NOT_FOUND;
   }
 
-	this->fd = open(&resolvedPath[0], O_RDONLY);
+	this->fd = open(filePath, O_RDONLY);
   if(this->fd < 0){
     // file open error
     switch(errno){
