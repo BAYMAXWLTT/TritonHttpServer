@@ -41,7 +41,7 @@ int Responder::checkFile(string path){
 	// absolutePath.append(root);
 	absolutePath.append(path);
 
-  char resolved_t[absolutePath.size()];
+  char resolved_t[1024];
   realpath(&absolutePath[0], resolved_t);
   string resolvedPath(resolved_t);
 	char *filePath = &resolvedPath[0];
@@ -52,6 +52,7 @@ int Responder::checkFile(string path){
   }
 
 	int filed = open(filePath, O_RDONLY);
+	cerr << filed <<'\n';
   if(filed < 0){
     // file open error
     switch(errno){
