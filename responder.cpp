@@ -30,7 +30,7 @@ vector<string> Responder::parseHelper(string insstr, char del){
 }
 
 int Responder::checkFile(string path){
-	string root = this->doc_root;
+	string root(this->doc_root);
 	int *res_file = &(this->fd);
   string absolutePath = root + path;
 
@@ -91,7 +91,7 @@ int Responder::verifyReq(HttpInstruction req){
   */
 
   int file_stat = checkFile(req.url);
-  cerr << "check file: " << file_stat <<'\n';
+  // cerr << "check file: " << file_stat <<'\n';
   if(file_stat != 0){
     return file_stat;
   }
@@ -99,7 +99,7 @@ int Responder::verifyReq(HttpInstruction req){
   /*
     Check and set file extension
   */
-	cerr << "before checking ext" << '\n';
+	// cerr << "before checking ext" << '\n';
   int ext_stat = setFileType(req.url);
   // cerr << "set file type" << ext_stat << '\n';
   if(ext_stat != 0){
