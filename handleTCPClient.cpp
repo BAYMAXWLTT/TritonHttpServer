@@ -98,6 +98,11 @@ void HandleReq(int clntSock, string doc_root){
 
       }
 
+      if(parser.isTerminated()){
+        cerr << "terminated" << '\n';
+        break;
+      }
+
       memset(buffer, 0, sizeof(buffer));
       numBytesRcvd = recv(clntSock, buffer, BUFSIZE, 0);
       if(numBytesRcvd < 0 && (errno == EWOULDBLOCK || errno == EAGAIN)){
