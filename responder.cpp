@@ -99,12 +99,12 @@ int Responder::verifyReq(HttpInstruction req){
   return OK;
 }
 
-void Responder::appendInitLine(vector<char> &sendQ, int statCode){
+void Responder::appendInitLine(int statCode){
   /* Append Initial Line: HTTP version, status code, description*/
   string resInitLine;
   /* Append HTTP/1.1 */
   resInitLine += HTTP + to_string(HTTP_VER_UPPER).substr(0, 3) + " ";
-  /* Append Status code */
+  /* Append Status code */r<char> &sendQ,
   resInitLine += to_string(statCode) + " ";
   /* Append description*/
   switch(statCode){
@@ -131,7 +131,7 @@ void Responder::appendInitLine(vector<char> &sendQ, int statCode){
   sendQ.insert(sendQ.end(), res.begin(), res.end());
 }
 
-void Responder::appendContentType(vector<char> &sendQ, FileType type){
+void Responder::appendContentType(FileType type){
   /* Append headers*/
   string cnt_type = CONTENT_TYPE;
   switch(type){
@@ -152,7 +152,7 @@ void Responder::appendContentType(vector<char> &sendQ, FileType type){
   sendQ.insert(sendQ.end(), res.begin(), res.end());
 }
 
-void Responder::appendContentLength(vector<char> &sendQ, off_t size){
+void Responder::appendContentLength(off_t size){
   int fs_size = (int)size;
   string sz = CONTENT_LEN + to_string(fs_size);
   sz += DELIMITER;
@@ -161,7 +161,7 @@ void Responder::appendContentLength(vector<char> &sendQ, off_t size){
   sendQ.insert(sendQ.end(), res.begin(), res.end());
 }
 
-void Responder::appendLastModified(vector<char> &sendQ, time_t *mtime){
+void Responder::appendLastModified(time_t *mtime){
   /* Append Last-Modified*/
   string lm = LAST_MOD;
   /* temp format: Www MMM DD HH:MM:SS YYYY*/
@@ -182,7 +182,7 @@ void Responder::appendLastModified(vector<char> &sendQ, time_t *mtime){
   sendQ.insert(sendQ.end(), res.begin(), res.end());
 }
 
-void Responder::appendServ(vector<char> sendQ, string serv){
+void Responder::appendServ(string serv){
   /* Append server version to header*/
   string sv = SERVER;
   sv += serv;
@@ -203,20 +203,20 @@ void Responder::response(int statCode, int fd, FileType type){
   }
 
   // add HTTP response initial line
-  appendInitLine(sendQ, statCode);
+  appendInitLine(statCode);
 
   /* Append Last modified*/
   cerr << "Last modified: " << fileStat.st_mtime <<'\n';
-  appendLastModified(sendQ, &fileStat.st_mtime);
+  appendLastModified(&fileStat.st_mtime);
 
   /* Append Content-Type*/
-  appendContentType(sendQ, type);
+  appendContentType(type);
 
   /* Append Content-Length*/
-  appendContentLength(sendQ, fileStat.st_size);
+  appendContentLength(fileStat.st_size);
 
   /* Append Server Name*/
-  appendServ(sendQ, SERVER_VER_NAME);
+  appendServ(SERVER_VER_NAME);
   send(clntSock, (void *)&sendQ[0], sendQ.size(), 0);
 
   /* Send File as body, until EOF */

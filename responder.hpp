@@ -54,6 +54,7 @@ class Responder {
     int clntSock;
     int fd;
     FileType type;
+    vector<char> sendQ;
 
     vector<string> parseHelper(string insstr, char del);
     /*
@@ -81,13 +82,16 @@ class Responder {
     /*
       Helpers for Appending headers
     */
-    void appendInitLine(vector<char> &sendQ, int statCode);
-    void appendContentType(vector<char> &sendQ, FileType type);
-    void appendContentLength(vector<char> &sendQ, off_t size);
-    void appendLastModified(vector<char> &sendQ, time_t *mtime);
-    void appendServ(vector<char> sendQ, string serv);
+    void appendInitLine(int statCode);
+    void appendContentType(FileType type);
+    void appendContentLength(off_t size);
+    void appendLastModified(time_t *mtime);
+    void appendServ(string serv);
 
   public:
+    ~Responder(){
+      sendQ.clear();
+    }
   	/*
   		Constructor, initialize private fields
       Initialized with client socket
