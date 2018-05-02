@@ -15,6 +15,7 @@ Data in valid format will be passed to responser for content verification and re
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -27,6 +28,7 @@ Data in valid format will be passed to responser for content verification and re
 #include "responder.hpp"
 #include "diewithmessage.hpp"
 
+#include <errno.h>
 using namespace std;
 
 void *HandleTCPClient(void *args){
@@ -50,9 +52,10 @@ void *HandleTCPClient(void *args){
       timeval *timeOutVal = new timeval;
       timeOutVal->tv_sec = 5;
       timeOutVal->tv_usec = 0;
-      if(setsockopt(clntSock, SOL_SOCKET, SO_RCVTIMEO, static_cast<void *>(timeOutVal), sizeof(timeOutVal)) < 0){
-        DiewithMessage("Called setsockopt(): socket option set failed"); /*socket creation failed*/
-      }
+      // if(setsockopt(clntSock, SOL_SOCKET, SO_RCVTIMEO, (void *)timeOutVal, sizeof(timeOutVal)) < 0){
+      //           cerr << strerror(errno) << '\n';
+      //   DiewithMessage("Called setsockopt(): socket option set failed"); /*socket creation failed*/
+      // }
 
       string addr(inet_ntoa(echoClntAddr.sin_addr));
   		cerr << "Handling client " + addr << '\n';
@@ -71,9 +74,11 @@ void HandleReq(int clntSock, string doc_root){
   Parser parser;
   Responder responder(clntSock, doc_root);
   ssize_t numBytesRcvd;
+  string msg;
 
   if((numBytesRcvd = recv(clntSock, buffer, BUFSIZE, 0)) < 0){
     /* Insert handle timeout error response */
+    cerr << "receive error" << '\n';
     responder.sendResponse(CLIENT_ERROR);
     close(clntSock);
     return;
@@ -84,28 +89,29 @@ void HandleReq(int clntSock, string doc_root){
     while(numBytesRcvd > 0){
       string input(buffer, numBytesRcvd);
       framer.append(input);
-
       while(framer.hasMessage()){
-          string msg;
           msg = framer.topMessage();
           framer.popMessage();
+          // cerr << msg << '\n';
           if(!parser.parse(msg)){
             /* Insert handle invalid header error response */
+            cerr << "header issue" << '\n';
             responder.sendResponse(CLIENT_ERROR);
             close(clntSock);
             return;
           }
       }
-
+      // cerr << "finish framing" << '\n';
       memset(buffer, 0, sizeof(buffer));
       if((numBytesRcvd = recv(clntSock, buffer, BUFSIZE, 0)) < 0){
         /* Insert Handle timeout error response*/
+        cerr << "receive error" << '\n';
         responder.sendResponse(CLIENT_ERROR);
         close(clntSock);
         return;
       }
-    }
 
+    }
     /* Produce response based on header provided*/
     int status = responder.verifyandAppendReq(parser.getReqHeader());
     responder.sendResponse(status);

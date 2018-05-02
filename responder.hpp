@@ -2,20 +2,33 @@
 #define RESPONDER_HPP
 
 #include <string>
+#include <cstring>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <iostream>
+#include <ctime>
+#include <unistd.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <errno.h>
 #include <vector>
+#include <sys/sendfile.h>
+#include "httpd.h"
 #include "parser.hpp"
 using namespace std;
 
-const string ERRORPAGE = "./errorPages";
+const string ERRORPAGE = "./errorPage";
 const int FORBIDDEN = 403;
 const string FORBIDDEN_DES = "Forbidden";
-const string FORBIDDEN_PATH = "/Forbidden.html";
+const string FORBIDDEN_PATH = ERRORPAGE + "/Forbidden.html";
 const int NOT_FOUND = 404;
 const string NOT_FOUND_DES = "Not Found";
-const string NOT_FOUND_PATH = "/NotFound.html";
+const string NOT_FOUND_PATH = ERRORPAGE + "/NotFound.html";
 const int CLIENT_ERROR = 400;
 const string CLIENT_ERROR_DES = "Bad Request";
-const string CLIENT_ERROR_PATH = "/ClientError.html";
+const string CLIENT_ERROR_PATH = ERRORPAGE + "/ClientError.html";
 const int OK = 200;
 const string OK_DES = "OK";
 const string DELIMITER = "\r\n\0";
@@ -42,6 +55,7 @@ class Responder {
     int fd;
     FileType type;
 
+    vector<string> parseHelper(string insstr, char del);
     /*
       send out file described by fd, in statCode
     */
@@ -70,7 +84,7 @@ class Responder {
     void appendInitLine(vector<char> &sendQ, int statCode);
     void appendContentType(vector<char> &sendQ, FileType type);
     void appendContentLength(vector<char> &sendQ, off_t size);
-    void appendLastModified(vector<char> &sendQ, time_t &mtime);
+    void appendLastModified(vector<char> &sendQ, time_t *mtime);
     void appendServ(vector<char> sendQ, string serv);
 
   public:

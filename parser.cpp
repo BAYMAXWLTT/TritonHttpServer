@@ -21,17 +21,30 @@ Parser::Parser(){
 		_isTerminated = false;
 }
 
+vector<string> Parser::parseHelper(string insstr, char del){
+	vector<string> res;
+	unsigned begin = 0;
+	unsigned end = 0;
+
+	while(end < insstr.size()){
+		if(insstr[end] == del){
+			res.push_back(insstr.substr(begin, end - begin));
+			begin = end + 1;
+		}
+			end++;
+	}
+
+	if(begin != end){
+		res.push_back(insstr.substr(begin, end - begin));
+	}
+	return res;
+}
+
 // need to modify parser to parse header
 bool Parser::parse(string insstr){
 	// PUT YOUR CODE HERE
 	vector<string> key_val;
-	// insstr.erase(remove(insstr.begin(), insstr.end(), ' '), insstr.end());
-	char *token = strtok(static_cast<char *>(&insstr[0]), " ");
-	while(token != NULL){
-			string temp(token);
-			key_val.push_back(temp);
-			token = strtok(NULL, " ");
-	}
+	key_val = parseHelper(insstr, ' ');
 
 	if(key_val.size() == 3){
 		/*
@@ -41,6 +54,7 @@ bool Parser::parse(string insstr){
 		*/
 
 		if(key_val[0].compare("GET") != 0){
+			cerr << "not GET" << '\n';
 			return false;
 		}
 
@@ -49,39 +63,50 @@ bool Parser::parse(string insstr){
 		if(_req.url == "/"){
 			_req.url = "/index.html";
 		}
+		// cerr << "URL: " <<key_val[1];
 
-		char *http_t = strtok(static_cast<char *>(&key_val[2][0]), "\\");
+		char *http_t = strtok(static_cast<char *>(&key_val[2][0]), "/");
 		string http(http_t);
 		if(http.compare("HTTP") != 0){
 			// if HTTP version is not correctly formed
+			cerr << "not HTTP" << '\n';
 			return false;
 		}
-		_req.http_ver = stof(strtok(NULL, "\\"));
+		_req.http_ver = stof(strtok(NULL, "/"));
 
 		/*
 			verify http version is supported
 		*/
 		if(_req.http_ver > HTTP_VER_UPPER){
-			return CLIENT_ERROR;
+			cerr << "HTTP version not supported" << '\n';
+			return false;
 		}
 	}else if(key_val.size() == 2){
 		/*
 			This is the "key: val" pair
 			1). verify if this header is supported
 		*/
-		string key = key_val[0].substr(0, key_val[0].size() - 1); // remove ':' from end
+		string key = key_val[0];
 		string val = key_val[1];
-
-		if(key.compare("Host") == 0){
+		// cerr << key << '\n';
+		// cerr << val << '\n';
+		if(key.compare("Host:") == 0){
 			_req.host = val;
-		}else if(key.compare("Connection") == 0){
+		}else if(key.compare("Connection:") == 0){
 			_req.connection = val;
 			if(val.compare("close") == 0){}
 				_isTerminated = true;
 		}else{
-			/* Not supoprted headers */
-			return false;
+			/* No column*/
+			if(key.find(":") == string::npos){
+					cerr << key << '\n';
+					return false;
+			}
 		}
+	}else{
+		/* Headers malform*/
+		cerr << key_val.size() << '\n';
+		return false;
 	}
 
 	return true;

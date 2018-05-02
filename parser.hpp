@@ -18,7 +18,7 @@ class Parser {
 	private:
 		HttpInstruction _req;
 		bool _isTerminated;
-
+		vector<string> parseHelper(string insstr, char del);
 	public:
 		/*
 			Constructor, initialize private fields

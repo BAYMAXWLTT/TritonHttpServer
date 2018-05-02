@@ -1,18 +1,4 @@
-#include <string>
-#include <cstring>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <ctime>
-#include <unistd.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <vector>
-#include <sys/sendfile.h>
 #include "responder.hpp"
-#include "httpd.h"
 using namespace std;
 
 // handle reponse based on request data structure
@@ -24,24 +10,45 @@ using namespace std;
   Private Helpers:
 
 *******************************************/
+vector<string> Responder::parseHelper(string insstr, char del){
+	vector<string> res;
+	unsigned begin = 0;
+	unsigned end = 0;
+
+	while(end < insstr.size()){
+		if(insstr[end] == del){
+			res.push_back(insstr.substr(begin, end - begin));
+			begin = end + 1;
+		}
+			end++;
+	}
+
+	if(begin != end){
+		res.push_back(insstr.substr(begin, end - begin));
+	}
+	return res;
+}
 
 int Responder::checkFile(string path){
   string absolutePath = this->doc_root + path;
-  string resolvedPath;
-  realpath(&absolutePath[0], &resolvedPath[0]);
-
+  char *resolved_t = new char;
+  realpath(&absolutePath[0], resolved_t);
+  string resolvedPath(resolved_t);
+  // cerr << resolvedPath << '\n';
   if(resolvedPath.find(this->doc_root) != string::npos){
-    if((this->fd = open(static_cast<char *>(&resolvedPath[0]), O_RDONLY)) < 0){
-      // file open error
-      switch(errno){
-        case EACCES:
-        // permission error
-        return FORBIDDEN;
+    return NOT_FOUND;
+  }
 
-        case ENOENT:
-        // file not exist
-        return NOT_FOUND;
-      }
+  if((this->fd = open(static_cast<char *>(&resolvedPath[0]), O_RDONLY)) < 0){
+    // file open error
+    switch(errno){
+      case EACCES:
+      // permission error
+      return FORBIDDEN;
+
+      case ENOENT:
+      // file not exist
+      return NOT_FOUND;
     }
   }
   return 0;
@@ -73,7 +80,9 @@ int Responder::verifyReq(HttpInstruction req){
   /*
     Check and set if file can be accessed
   */
+
   int file_stat = checkFile(req.url);
+  cerr << "check file: " << file_stat <<'\n';
   if(file_stat != 0){
     return file_stat;
   }
@@ -82,6 +91,7 @@ int Responder::verifyReq(HttpInstruction req){
     Check and set file extension
   */
   int ext_stat = setFileType(req.url);
+  cerr << "set file type" << ext_stat << '\n';
   if(ext_stat != 0){
     return ext_stat;
   }
@@ -93,7 +103,7 @@ void Responder::appendInitLine(vector<char> &sendQ, int statCode){
   /* Append Initial Line: HTTP version, status code, description*/
   string resInitLine;
   /* Append HTTP/1.1 */
-  resInitLine += HTTP + to_string(HTTP_VER_UPPER) + " ";
+  resInitLine += HTTP + to_string(HTTP_VER_UPPER).substr(0, 3) + " ";
   /* Append Status code */
   resInitLine += to_string(statCode) + " ";
   /* Append description*/
@@ -116,8 +126,9 @@ void Responder::appendInitLine(vector<char> &sendQ, int statCode){
   }
 
   resInitLine += DELIMITER;
+  cerr << resInitLine << '\n';
   vector<char> res(resInitLine.begin(), resInitLine.end());
-  sendQ = res;
+  sendQ.insert(sendQ.end(), res.begin(), res.end());
 }
 
 void Responder::appendContentType(vector<char> &sendQ, FileType type){
@@ -136,36 +147,39 @@ void Responder::appendContentType(vector<char> &sendQ, FileType type){
       cnt_type += CONTENT_TXT;
   }
   cnt_type += DELIMITER;
+  cerr << cnt_type << '\n';
   vector<char> res(cnt_type.begin(), cnt_type.end());
-  sendQ = res;
+  sendQ.insert(sendQ.end(), res.begin(), res.end());
 }
 
 void Responder::appendContentLength(vector<char> &sendQ, off_t size){
   int fs_size = (int)size;
   string sz = CONTENT_LEN + to_string(fs_size);
   sz += DELIMITER;
+  cerr << sz << '\n';
   vector<char> res(sz.begin(), sz.end());
-  sendQ = res;
+  sendQ.insert(sendQ.end(), res.begin(), res.end());
 }
 
-void Responder::appendLastModified(vector<char> &sendQ, time_t &mtime){
+void Responder::appendLastModified(vector<char> &sendQ, time_t *mtime){
   /* Append Last-Modified*/
   string lm = LAST_MOD;
   /* temp format: Www MMM DD HH:MM:SS YYYY*/
-  string tm = ctime(&mtime);
-  char *temp_t= strtok(&tm[0], " ");
-  vector<string> token;
+  cerr << lm << '\n';
+  struct tm* gmt = gmtime(mtime);
+  char gm[512];
+  strftime(gm, 512, "%a, %d %b %Y %T %Z", gmt);
+  string tim(gm);
+  lm += tim;
+  cerr << tim << '\n';
+  vector<string> token = parseHelper(tim, ' ');
 
-  while(temp_t != NULL){
-      string temp(temp_t);
-      token.push_back(temp);
-      temp_t = strtok(NULL, " ");
-  }
   /* Reformat the time string */
-  lm += token[0] + ", " + token[2] + " " + token[1] + " " + token[3] + " " + token[4] + "GMT";
+  // lm += token[0] + ", " + token[2] + " " + token[1] + " " + token[3] + " " + token[4] + "GMT";
   lm += DELIMITER;
+    cerr << lm << '\n';
   vector<char> res(lm.begin(), lm.end());
-  sendQ = res;
+  sendQ.insert(sendQ.end(), res.begin(), res.end());
 }
 
 void Responder::appendServ(vector<char> sendQ, string serv){
@@ -173,8 +187,9 @@ void Responder::appendServ(vector<char> sendQ, string serv){
   string sv = SERVER;
   sv += serv;
   sv += DELIMITER;
+    cerr << sv << '\n';
   vector<char> res(sv.begin(), sv.end());
-  sendQ = res;
+  sendQ.insert(sendQ.end(), res.begin(), res.end());
 }
 
 void Responder::response(int statCode, int fd, FileType type){
@@ -182,12 +197,17 @@ void Responder::response(int statCode, int fd, FileType type){
   const int BUFSIZE = 4096;
   vector<char> sendQ;
   struct stat fileStat;
-  fstat(fd, &fileStat);
+
+  if(fstat(fd, &fileStat) < 0){
+    cerr << strerror(errno) << '\n';
+  }
+
   // add HTTP response initial line
   appendInitLine(sendQ, statCode);
 
   /* Append Last modified*/
-  appendLastModified(sendQ, fileStat.st_mtime);
+  cerr << "Last modified: " << fileStat.st_mtime <<'\n';
+  appendLastModified(sendQ, &fileStat.st_mtime);
 
   /* Append Content-Type*/
   appendContentType(sendQ, type);
@@ -212,7 +232,10 @@ int Responder::verifyandAppendReq(HttpInstruction req){
   if(req.host.size() == 0){
     return CLIENT_ERROR;
   }
-
+  // cerr << req.host << '\n';
+  // cerr << req.http_ver << '\n';
+  // cerr << req.url << '\n';
+  // cerr << req.connection << '\n';
   return verifyReq(req);
 }
 
@@ -226,17 +249,23 @@ void Responder::sendResponse(int status){
     break;
 
     case FORBIDDEN: // 403 forbidden
-      frbid_fd = openat(AT_FDCWD, &FORBIDDEN_PATH[0], O_RDONLY);
+      if((frbid_fd = openat(AT_FDCWD, &FORBIDDEN_PATH[0], O_RDONLY)) < 0){
+        cerr << strerror(errno) << '\n';
+      }
       response(status, frbid_fd, TEXT);
     break;
 
     case NOT_FOUND: // 404 not found
-      Fd_fd = openat(AT_FDCWD, &NOT_FOUND_PATH[0], O_RDONLY);
+      if((Fd_fd = openat(AT_FDCWD, &NOT_FOUND_PATH[0], O_RDONLY)) < 0){
+        cerr << strerror(errno) << '\n';
+      }
       response(status, Fd_fd, TEXT);
     break;
 
     default: // 400 client error
-      clnt_fd = openat(AT_FDCWD, &CLIENT_ERROR_PATH[0], O_RDONLY);
+      if((clnt_fd = openat(AT_FDCWD, &CLIENT_ERROR_PATH[0], O_RDONLY)) < 0){
+        cerr << strerror(errno) << '\n';
+      }
       response(status, clnt_fd, TEXT);
   }
   return;
