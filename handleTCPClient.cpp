@@ -83,18 +83,19 @@ void HandleReq(int clntSock, string doc_root){
             close(clntSock);
             return;
           }
-      }
 
-      /* Produce response based on header provided*/
-      while(parser.isInstr()){
-        cerr << "parse" << '\n';
-        int status = responder.verifyandAppendReq(parser.getReqHeader());
-        responder.sendResponse(status);
-      }
+          /* Produce response based on header provided*/
+          while(parser.isInstr()){
+            cerr << "parse" << '\n';
+            int status = responder.verifyandAppendReq(parser.getReqHeader());
+            responder.sendResponse(status);
+          }
 
-      if(parser.isTerminated()){
-        cerr << "terminated" << '\n';
-        break;
+          if(parser.isTerminated()){
+            cerr << "terminated" << '\n';
+            break;
+          }
+
       }
 
       memset(buffer, 0, sizeof(buffer));
