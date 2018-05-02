@@ -165,8 +165,10 @@ void Responder::appendLastModified(struct stat f_stat){
   /* temp format: Www MMM DD HH:MM:SS YYYY*/
   cerr << lm << '\n';
   time_t t = f_stat.st_mtime;
-  struct tm* gmt = gmtime(&t);
   char gm[512];
+  struct tm* gmt;
+  gmt = gmtime(&t);
+
   strftime(gm, 512, "%a, %d %b %Y %T %Z", gmt);
   string tim(gm);
   lm += tim;
