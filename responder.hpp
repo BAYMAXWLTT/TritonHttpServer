@@ -54,7 +54,7 @@ class Responder {
     int clntSock;
     int fd;
     FileType type;
-    vector<char> sendQ;
+    string sendQ;
 
     vector<string> parseHelper(string insstr, char del);
     /*
@@ -97,6 +97,7 @@ class Responder {
       Initialized with client socket
   	*/
   	Responder(int client, string root){
+        sendQ();
         clntSock = client;
         doc_root = root;
     };

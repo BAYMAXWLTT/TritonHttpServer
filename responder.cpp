@@ -128,8 +128,7 @@ void Responder::appendInitLine(int statCode){
 
   resInitLine += DELIMITER;
   cerr << resInitLine << '\n';
-  vector<char> res(resInitLine.begin(), resInitLine.end());
-  sendQ.insert(sendQ.end(), res.begin(), res.end());
+  this->sendQ += resInitLine;
 }
 
 void Responder::appendContentType(FileType type){
@@ -149,8 +148,7 @@ void Responder::appendContentType(FileType type){
   }
   cnt_type += DELIMITER;
   cerr << cnt_type << '\n';
-  vector<char> res(cnt_type.begin(), cnt_type.end());
-  sendQ.insert(sendQ.end(), res.begin(), res.end());
+  this->sendQ += cnt_type;
 }
 
 void Responder::appendContentLength(off_t size){
@@ -158,8 +156,7 @@ void Responder::appendContentLength(off_t size){
   string sz = CONTENT_LEN + to_string(fs_size);
   sz += DELIMITER;
   cerr << sz << '\n';
-  vector<char> res(sz.begin(), sz.end());
-  sendQ.insert(sendQ.end(), res.begin(), res.end());
+    this->sendQ += sz;
 }
 
 void Responder::appendLastModified(time_t *mtime){
@@ -179,8 +176,7 @@ void Responder::appendLastModified(time_t *mtime){
   // lm += token[0] + ", " + token[2] + " " + token[1] + " " + token[3] + " " + token[4] + "GMT";
   lm += DELIMITER;
     cerr << lm << '\n';
-  vector<char> res(lm.begin(), lm.end());
-  sendQ.insert(sendQ.end(), res.begin(), res.end());
+    this->sendQ += lm;
 }
 
 void Responder::appendServ(string serv){
@@ -189,14 +185,12 @@ void Responder::appendServ(string serv){
   sv += serv;
   sv += DELIMITER;
     cerr << sv << '\n';
-  vector<char> res(sv.begin(), sv.end());
-  sendQ.insert(sendQ.end(), res.begin(), res.end());
+      this->sendQ += sv;
 }
 
 void Responder::response(int statCode, int fd, FileType type){
   off_t offset = 0;
   const int BUFSIZE = 4096;
-  vector<char> sendQ;
   struct stat fileStat;
 
   if(fstat(fd, &fileStat) < 0){
