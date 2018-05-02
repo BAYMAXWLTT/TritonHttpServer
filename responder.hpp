@@ -60,7 +60,7 @@ class Responder {
     /*
       send out file described by fd, in statCode
     */
-    void response(int statCode, int fd, FileType type);
+    void response(int statCode);
     /*
       verify request header and generate status code
     */
@@ -83,7 +83,7 @@ class Responder {
       Helpers for Appending headers
     */
     void appendInitLine(int statCode);
-    void appendContentType(FileType type);
+    void appendContentType();
     void appendContentLength();
     void appendLastModified();
     void appendServ(string serv);
