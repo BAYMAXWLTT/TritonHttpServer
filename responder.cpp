@@ -59,6 +59,7 @@ int Responder::checkFile(const string path){
 
 int Responder::setFileType(string path){
     string ext = path.substr(path.find_last_of(".") + 1);
+		cerr << ext << '\n';
     if(ext.compare("html") == 0){
       this->type = TEXT;
     }else if(ext.compare("jpeg") == 0){
@@ -93,7 +94,7 @@ int Responder::verifyReq(HttpInstruction req){
   /*
     Check and set file extension
   */
-	cerr << "before checking ext" << '\n';
+	// cerr << "before checking ext" << '\n';
   int ext_stat = setFileType(req.url);
   cerr << "set file type" << ext_stat << '\n';
   if(ext_stat != 0){
