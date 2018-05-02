@@ -112,9 +112,9 @@ void HandleReq(int clntSock, string doc_root){
       }
 
     }
-    
+
     /* Produce response based on header provided*/
-    if(numBytesRcvd > 0){
+    if(parser.isInstr()){
       int status = responder.verifyandAppendReq(parser.getReqHeader());
       responder.sendResponse(status);
     }

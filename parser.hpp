@@ -36,6 +36,7 @@ class Parser {
 			Return currently parsed http headers
 		*/
 		HttpInstruction getReqHeader(){
+			hasInstr = false;
 			return _req;
 		}
 
