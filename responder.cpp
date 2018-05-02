@@ -132,10 +132,10 @@ void Responder::appendInitLine(int statCode){
   this->sendQ += resInitLine;
 }
 
-void Responder::appendContentType(FileType type){
+void Responder::appendContentType(){
   /* Append headers*/
   string cnt_type = CONTENT_TYPE;
-  switch(type){
+  switch(this->type){
     case JPEG:
       cnt_type += CONTENT_JPEG;
     break;
@@ -203,9 +203,9 @@ void Responder::appendServ(string serv){
       this->sendQ += sv;
 }
 
-void Responder::response(int statCode, int fd, FileType type){
+void Responder::response(int statCode){
   off_t offset = 0;
-  const int BUFSIZE = 4096;
+  const int BUFSIZE = 8196;
   // struct stat fileStat;
 
   // add HTTP response initial line
@@ -216,7 +216,7 @@ void Responder::response(int statCode, int fd, FileType type){
   appendLastModified();
 
   /* Append Content-Type*/
-  appendContentType(type);
+  appendContentType();
 
   /* Append Content-Length*/
   appendContentLength();
@@ -228,8 +228,7 @@ void Responder::response(int statCode, int fd, FileType type){
   /* Send File as body, until EOF */
   // int count = fileStat.st_size;
   while(sendfile(clntSock, fd, &offset, BUFSIZE) > 0);
-  close(fd);
-  sendQ = "";
+	cerr << "finish sending file" << '\n';
 }
 
 /************************************
@@ -249,33 +248,37 @@ int Responder::verifyandAppendReq(HttpInstruction req){
 }
 
 void Responder::sendResponse(int status){
-  int frbid_fd;
-  int Fd_fd;
-  int clnt_fd;
   switch(status){
     case OK:
-      response(status, this->fd, type);
+      response(status);
     break;
 
     case FORBIDDEN: // 403 forbidden
-      if((frbid_fd = openat(AT_FDCWD, &FORBIDDEN_PATH[0], O_RDONLY)) < 0){
+      if((this->fd = openat(AT_FDCWD, &FORBIDDEN_PATH[0], O_RDONLY)) < 0){
         cerr << strerror(errno) << '\n';
       }
-      response(status, frbid_fd, TEXT);
+			this->type = TEXT;
+      response(status);
     break;
 
     case NOT_FOUND: // 404 not found
-      if((Fd_fd = openat(AT_FDCWD, &NOT_FOUND_PATH[0], O_RDONLY)) < 0){
+      if((this->fd = openat(AT_FDCWD, &NOT_FOUND_PATH[0], O_RDONLY)) < 0){
         cerr << strerror(errno) << '\n';
       }
-      response(status, Fd_fd, TEXT);
+			this->type = TEXT;
+      response(status);
     break;
 
     default: // 400 client error
-      if((clnt_fd = openat(AT_FDCWD, &CLIENT_ERROR_PATH[0], O_RDONLY)) < 0){
+      if((this->fd = openat(AT_FDCWD, &CLIENT_ERROR_PATH[0], O_RDONLY)) < 0){
         cerr << strerror(errno) << '\n';
       }
-      response(status, clnt_fd, TEXT);
+			this->type = TEXT;
+      response(status);
   }
+
+	close(this->fd);
+	this->fd = -1;
+	sendQ = "";
   return;
 }
