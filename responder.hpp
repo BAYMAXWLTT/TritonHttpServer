@@ -96,6 +96,9 @@ class Responder {
   	Responder(int client, string root){
         clntSock = client;
         doc_root = root;
+        fd = -1;
+        sendQ = "";
+        clntSock = -1;
     };
 
     /*
