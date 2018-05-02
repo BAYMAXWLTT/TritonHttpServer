@@ -84,8 +84,8 @@ class Responder {
     */
     void appendInitLine(int statCode);
     void appendContentType(FileType type);
-    void appendContentLength(off_t size);
-    void appendLastModified(time_t *mtime);
+    void appendContentLength(struct stat size);
+    void appendLastModified(struct stat mtime);
     void appendServ(string serv);
 
   public:
