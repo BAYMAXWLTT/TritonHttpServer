@@ -29,7 +29,7 @@ vector<string> Responder::parseHelper(string insstr, char del){
 	return res;
 }
 
-int Responder::checkFile(const string path){
+int Responder::checkFile(string path){
   string absolutePath = this->doc_root + path;
   char resolved_t[absolutePath.size()];
   realpath(&absolutePath[0], resolved_t);

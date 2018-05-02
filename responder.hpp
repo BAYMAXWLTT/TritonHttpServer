@@ -89,9 +89,6 @@ class Responder {
     void appendServ(string serv);
 
   public:
-    ~Responder(){
-      sendQ.clear();
-    }
   	/*
   		Constructor, initialize private fields
       Initialized with client socket
