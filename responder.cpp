@@ -217,6 +217,8 @@ void Responder::response(int statCode){
 
   /* Append Server Name*/
   appendServ(SERVER_VER_NAME);
+
+	this->sendQ += DELIMITER;
 	cerr << sendQ << '\n';
 	cerr << this->fd << '\n';
 	char *header = &(this->sendQ[0]);
