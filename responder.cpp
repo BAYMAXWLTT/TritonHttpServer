@@ -34,7 +34,9 @@ int Responder::checkFile(string path){
 	int *res_file = &(this->fd);
 	cerr << root << '\n';
 	cerr << path << '\n';
-  string absolutePath = root + path;
+  string absolutePath;
+	absolutePath.append(root);
+	absolutePath.append(path);
 
   char resolved_t[absolutePath.size()];
   realpath(&absolutePath[0], resolved_t);
