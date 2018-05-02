@@ -112,9 +112,13 @@ void HandleReq(int clntSock, string doc_root){
       }
 
     }
+    
     /* Produce response based on header provided*/
-    int status = responder.verifyandAppendReq(parser.getReqHeader());
-    responder.sendResponse(status);
+    if(numBytesRcvd > 0){
+      int status = responder.verifyandAppendReq(parser.getReqHeader());
+      responder.sendResponse(status);
+    }
+    numBytesRcvd = 0;
   }
 
   /* Connection: close detected, close socket and return */

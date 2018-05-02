@@ -18,6 +18,7 @@ Verify the header format and parse the request into valid request data structure
 using namespace std;
 /* Constructor */
 Parser::Parser(){
+	  hasInstr = false;
 		_isTerminated = false;
 }
 
@@ -108,6 +109,6 @@ bool Parser::parse(string insstr){
 		cerr << key_val.size() << '\n';
 		return false;
 	}
-
+	hasInstr = true;
 	return true;
 }

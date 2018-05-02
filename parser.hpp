@@ -17,6 +17,7 @@ typedef struct HttpInstruction_t {
 class Parser {
 	private:
 		HttpInstruction _req;
+		bool hasInstr;
 		bool _isTerminated;
 		vector<string> parseHelper(string insstr, char del);
 	public:
@@ -43,6 +44,10 @@ class Parser {
 		*/
 		bool isTerminated(){
 			return _isTerminated;
+		}
+
+		bool isInstr(){
+			return hasInstr;
 		}
 };
 
