@@ -167,18 +167,19 @@ void Responder::appendLastModified(struct stat f_stat){
   time_t t = f_stat.st_mtime;
   cerr << t << '\n';
 
-  char gm[512];
-  struct tm* gmt;
-  gmt = gmtime(&t);
-
-  strftime(gm, 512, "%a, %d %b %Y %T %Z", gmt);
-  string tim(gm);
-  lm += tim;
-  cerr << tim << '\n';
-  vector<string> token = parseHelper(tim, ' ');
+  // char gm[512];
+  // struct tm* gmt;
+  // gmt = gmtime(&t);
+  //
+  // strftime(gm, 512, "%a, %d %b %Y %T %Z", gmt);
+  // string tim(gm);
+  // lm += tim;
+  // cerr << tim << '\n';
+  // vector<string> token = parseHelper(tim, ' ');
 
   /* Reformat the time string */
   // lm += token[0] + ", " + token[2] + " " + token[1] + " " + token[3] + " " + token[4] + "GMT";
+  lm += to_string(t);
   lm += DELIMITER;
     cerr << lm << '\n';
     this->sendQ += lm;
