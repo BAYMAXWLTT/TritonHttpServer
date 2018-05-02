@@ -97,7 +97,6 @@ class Responder {
       Initialized with client socket
   	*/
   	Responder(int client, string root){
-        sendQ();
         clntSock = client;
         doc_root = root;
     };
