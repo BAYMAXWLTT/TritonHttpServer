@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # cse291-project1
 
 Basic skeleton code for CSE 291's Project 1
@@ -11,3 +12,7 @@ make
 ## Author
 Team: Baba
 Name: Hou Wang
+=======
+# TritonHttpServer
+CSE291 Web Server Project
+>>>>>>> 03c31c9e9621e9b45a36ade5b737fed73c7fc81a
