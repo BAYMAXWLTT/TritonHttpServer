@@ -44,8 +44,8 @@ int Responder::checkFile(string path){
     return NOT_FOUND;
   }
 
-	fd = open(filePath, O_RDONLY);
-  if(fd < 0){
+	Responder::fd = open(filePath, O_RDONLY);
+  if(Responder::fd < 0){
     // file open error
     switch(errno){
       case EACCES:
