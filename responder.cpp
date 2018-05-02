@@ -70,7 +70,7 @@ int Responder::setFileType(string path){
 		cerr << ext << '\n';
     if(ext.compare("html") == 0){
       this->type = TEXT;
-    }else if(ext.compare("jpeg") == 0){
+    }else if(ext.compare("jpg") == 0){
       this->type = JPEG;
     }else if(ext.compare("png") == 0){
       this->type = PNG;
