@@ -44,9 +44,16 @@ vector<string> Parser::parseHelper(string insstr, char del){
 // need to modify parser to parse header
 bool Parser::parse(string insstr){
 	// PUT YOUR CODE HERE
+	if(insstr.compare("") == 0){
+		// delimiter
+		reqQ.push(_req);
+		return true;
+	}
+
 	vector<string> key_val;
 	key_val = parseHelper(insstr, ' ');
-
+	cerr << insstr << '\n';
+	cerr << key_val.size() << '\n';
 	if(key_val.size() == 3){
 		/*
 			This is the http initial line:
@@ -95,20 +102,20 @@ bool Parser::parse(string insstr){
 			_req.host = val;
 		}else if(key.compare("Connection:") == 0){
 			_req.connection = val;
-			if(val.compare("close") == 0){}
+			if(val.compare("close") == 0){
 				_isTerminated = true;
+				reqQ.push(_req);
+			}
 		}else{
 			/* No column*/
 			if(key.find(":") == string::npos){
-					cerr << key << '\n';
-					return false;
+				return false;
 			}
 		}
 	}else{
 		/* Headers malform*/
-		cerr << key_val.size() << '\n';
 		return false;
 	}
-	hasInstr = true;
+
 	return true;
 }

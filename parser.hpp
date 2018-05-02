@@ -2,6 +2,8 @@
 #define PARSER_HPP
 
 #include <string>
+#include <vector>
+#include <queue>
 #include <cstdint>
 using namespace std;
 
@@ -16,6 +18,7 @@ typedef struct HttpInstruction_t {
 
 class Parser {
 	private:
+		queue<HttpInstruction> reqQ;
 		HttpInstruction _req;
 		bool hasInstr;
 		bool _isTerminated;
@@ -36,7 +39,11 @@ class Parser {
 			Return currently parsed http headers
 		*/
 		HttpInstruction getReqHeader(){
-			hasInstr = false;
+			if(!reqQ.empty()){
+				HttpInstruction res = reqQ.front();
+				reqQ.pop();
+				return res;
+			}
 			return _req;
 		}
 
@@ -48,7 +55,7 @@ class Parser {
 		}
 
 		bool isInstr(){
-			return hasInstr;
+			return !reqQ.empty();
 		}
 };
 

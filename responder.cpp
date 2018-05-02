@@ -185,7 +185,7 @@ void Responder::appendLastModified(){
   string tim(gm);
   lm += tim;
   lm += DELIMITER;
-	
+
   this->sendQ += lm;
 }
 
@@ -217,14 +217,14 @@ void Responder::response(int statCode){
 
   /* Append Server Name*/
   appendServ(SERVER_VER_NAME);
+	cerr << sendQ << '\n';
+	cerr << this->fd << '\n';
 	char *header = &(this->sendQ[0]);
   if(send(clntSock, (void *)header, this->sendQ.size(), 0) < 0){
 		cerr << strerror(errno) << '\n';
 	}
 
   /* Send File as body, until EOF */
-	// cerr << this->fd << '\n';
-	// cerr << this->sendQ << '\n';
 	int sent = 0;
   while((sent = sendfile(clntSock, this->fd, &offset, BUFSIZE)) > 0){
 		cerr << sent << '\n';

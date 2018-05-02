@@ -10,25 +10,7 @@ Handle error in data format level.
 
 Data in valid format will be passed to responser for content verification and response
 *******************************************************************************************/
-
-#include <iostream>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <string>
-#include <cstring>
-#include "httpd.h"
 #include "handleTCPClient.hpp"
-#include "framer.hpp"
-#include "parser.hpp"
-#include "responder.hpp"
-#include "diewithmessage.hpp"
-
-#include <errno.h>
 using namespace std;
 
 void *HandleTCPClient(void *args){
@@ -50,10 +32,10 @@ void *HandleTCPClient(void *args){
       }
 
       /* set socket receive timeout */
-      timeval *timeOutVal = new timeval;
-      timeOutVal->tv_sec = 5;
-      timeOutVal->tv_usec = 0;
-      if(setsockopt(clntSock, SOL_SOCKET, SO_RCVTIMEO, (char *)timeOutVal, sizeof(timeOutVal)) < 0){
+      struct timeval timeOutVal;
+      timeOutVal.tv_sec = 5;
+      timeOutVal.tv_usec = 0;
+      if(setsockopt(clntSock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeOutVal, sizeof(timeOutVal)) < 0){
                 cerr << strerror(errno) << '\n';
         DiewithMessage("Called setsockopt(): socket option set failed"); /*socket creation failed*/
       }
@@ -77,16 +59,15 @@ void HandleReq(int clntSock, string doc_root){
   ssize_t numBytesRcvd;
   string msg;
 
-  if((numBytesRcvd = recv(clntSock, buffer, BUFSIZE, 0)) < 0){
+  numBytesRcvd = recv(clntSock, buffer, BUFSIZE, MSG_DONTWAIT);
+  if(numBytesRcvd < 0 && (errno == EWOULDBLOCK || errno == EAGAIN)){
     /* Insert handle timeout error response */
-    cerr << "receive error" << '\n';
+    cerr << "time out error" << '\n';
     responder.sendResponse(CLIENT_ERROR);
     close(clntSock);
     return;
   }
 
-  while(!parser.isTerminated()){
-    /* if connection:closed not detect */
     while(numBytesRcvd > 0){
       string input(buffer, numBytesRcvd);
       framer.append(input);
@@ -97,30 +78,36 @@ void HandleReq(int clntSock, string doc_root){
           if(!parser.parse(msg)){
             /* Insert handle invalid header error response */
             cerr << "header issue" << '\n';
+            cerr << msg << '\n';
             responder.sendResponse(CLIENT_ERROR);
             close(clntSock);
             return;
           }
       }
-      // cerr << "finish framing" << '\n';
+
+      /* Produce response based on header provided*/
+      while(parser.isInstr()){
+        cerr << "parse" << '\n';
+        int status = responder.verifyandAppendReq(parser.getReqHeader());
+        responder.sendResponse(status);
+      }
+
+      if(parser.isTerminated()){
+        cerr << "terminated" << '\n';
+        break;
+      }
+
       memset(buffer, 0, sizeof(buffer));
-      if((numBytesRcvd = recv(clntSock, buffer, BUFSIZE, 0)) < 0){
+      numBytesRcvd = recv(clntSock, buffer, BUFSIZE, 0);
+      if(numBytesRcvd < 0 && (errno == EWOULDBLOCK || errno == EAGAIN)){
         /* Insert Handle timeout error response*/
-        cerr << "receive error" << '\n';
+        cerr << "time out" << '\n';
         responder.sendResponse(CLIENT_ERROR);
         close(clntSock);
         return;
       }
-
+      cerr << numBytesRcvd << '\n';
     }
-
-    /* Produce response based on header provided*/
-    if(parser.isInstr()){
-      cerr << "parse" << '\n';
-      int status = responder.verifyandAppendReq(parser.getReqHeader());
-      responder.sendResponse(status);
-    }
-  }
 
   /* Connection: close detected, close socket and return */
   cerr << "reach out of loop" << '\n';
