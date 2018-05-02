@@ -90,18 +90,18 @@ void HandleReq(int clntSock, string doc_root){
             int status = responder.verifyandAppendReq(parser.getReqHeader());
             responder.sendResponse(status);
           }
-
-          if(parser.isTerminated()){
-            cerr << "terminated" << '\n';
-            break;
-          }
+          //
+          // if(parser.isTerminated()){
+          //   cout << "terminated" << '\n';
+          //   break;
+          // }
 
       }
-
-      if(parser.isTerminated()){
-        cerr << "terminated" << '\n';
-        break;
-      }
+      // 
+      // if(parser.isTerminated()){
+      //   cout << "terminated" << '\n';
+      //   break;
+      // }
 
       memset(buffer, 0, sizeof(buffer));
       numBytesRcvd = recv(clntSock, buffer, BUFSIZE, 0);
