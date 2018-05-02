@@ -34,25 +34,27 @@ int Responder::checkFile(const string path){
   char *resolved_t = new char;
   realpath(&absolutePath[0], resolved_t);
   string resolvedPath(resolved_t);
-  cerr << resolvedPath << '\n';
+
+	cerr << resolvedPath << '\n';
+
   if(resolvedPath.find(this->doc_root) == string::npos){
     return NOT_FOUND;
   }
 
-  if((this->fd = open(static_cast<char *>(&resolvedPath[0]), O_RDONLY)) < 0){
+  if((this->fd = openat(&resolvedPath[0], O_RDONLY)) < 0){
     // file open error
     switch(errno){
       case EACCES:
       // permission error
       return FORBIDDEN;
 
-      case ENOENT:
+      default: // ENOENT:
       // file not exist
       return NOT_FOUND;
     }
   }
 	cerr << this->fd <<'\n';
-  return 0;
+	return 0;
 }
 
 int Responder::setFileType(string path){
@@ -241,10 +243,7 @@ int Responder::verifyandAppendReq(HttpInstruction req){
   if(req.host.size() == 0){
     return CLIENT_ERROR;
   }
-  // cerr << req.host << '\n';
-  // cerr << req.http_ver << '\n';
-  // cerr << req.url << '\n';
-  // cerr << req.connection << '\n';
+
   return verifyReq(req);
 }
 
