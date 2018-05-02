@@ -61,13 +61,12 @@ int Responder::checkFile(string path){
     }
   }
 	*res_file = filed;
-	cerr << filed <<'\n';
 	return 0;
 }
 
 int Responder::setFileType(string path){
     string ext = path.substr(path.find_last_of(".") + 1);
-		cerr << ext << '\n';
+
     if(ext.compare("html") == 0){
       this->type = TEXT;
     }else if(ext.compare("jpg") == 0){
@@ -93,7 +92,6 @@ int Responder::verifyReq(HttpInstruction req){
     Check and set if file can be accessed
   */
   int file_stat = checkFile(req.url);
-  cerr << "check file: " << file_stat <<'\n';
   if(file_stat != 0){
     return file_stat;
   }
@@ -101,9 +99,7 @@ int Responder::verifyReq(HttpInstruction req){
   /*
     Check and set file extension
   */
-	// cerr << "before checking ext" << '\n';
   int ext_stat = setFileType(req.url);
-  cerr << "set file type" << ext_stat << '\n';
   if(ext_stat != 0){
     return ext_stat;
   }
@@ -139,7 +135,6 @@ void Responder::appendInitLine(int statCode){
   }
 
   resInitLine += DELIMITER;
-  cerr << resInitLine << '\n';
   this->sendQ += resInitLine;
 }
 
@@ -159,7 +154,6 @@ void Responder::appendContentType(){
       cnt_type += CONTENT_TXT;
   }
   cnt_type += DELIMITER;
-  cerr << cnt_type << '\n';
   this->sendQ += cnt_type;
 }
 
@@ -171,7 +165,6 @@ void Responder::appendContentLength(){
   int fs_size = (int)f_stat.st_size;
   string sz = CONTENT_LEN + to_string(fs_size);
   sz += DELIMITER;
-  cerr << sz << '\n';
     this->sendQ += sz;
 }
 
@@ -183,25 +176,16 @@ void Responder::appendLastModified(){
     cerr << strerror(errno) << '\n';
   }
   /* temp format: Www MMM DD HH:MM:SS YYYY*/
-  // cerr << lm << '\n';
-  // time_t t = f_stat.st_mtime;
-  // cerr << t << '\n';
-  //
-  // char gm[512];
-  // struct tm* gmt;
-  // gmt = gmtime(&t);
-  // //
-  // strftime(gm, 512, "%a, %d %b %Y %T %Z", gmt);
-  // string tim(gm);
-  // lm += tim;
-  // cerr << tim << '\n';
-  // vector<string> token = parseHelper(tim, ' ');
+  time_t t = f_stat.st_mtime;
 
-  /* Reformat the time string */
-  // lm += token[0] + ", " + token[2] + " " + token[1] + " " + token[3] + " " + token[4] + "GMT";
-  // lm += to_string(t);
+  char gm[512];
+  struct tm* gmt;
+  gmt = gmtime(&t);
+  strftime(gm, 512, "%a, %d %b %Y %T %Z", gmt);
+  string tim(gm);
+  lm += tim;
   lm += DELIMITER;
-  cerr << lm << '\n';
+	
   this->sendQ += lm;
 }
 
@@ -210,13 +194,12 @@ void Responder::appendServ(string serv){
   string sv = SERVER;
   sv += serv;
   sv += DELIMITER;
-    cerr << sv << '\n';
       this->sendQ += sv;
 }
 
 void Responder::response(int statCode){
   off_t offset = 0;
-  const int BUFSIZE = 8196;
+  const int BUFSIZE = 4096;
   // struct stat fileStat;
 
   // add HTTP response initial line
@@ -234,12 +217,21 @@ void Responder::response(int statCode){
 
   /* Append Server Name*/
   appendServ(SERVER_VER_NAME);
-  send(clntSock, (void *)&sendQ[0], sendQ.size(), 0);
+	char *header = &(this->sendQ[0]);
+  if(send(clntSock, (void *)header, this->sendQ.size(), 0) < 0){
+		cerr << strerror(errno) << '\n';
+	}
 
   /* Send File as body, until EOF */
-  // int count = fileStat.st_size;
-  while(sendfile(clntSock, fd, &offset, BUFSIZE) > 0);
-
+	// cerr << this->fd << '\n';
+	// cerr << this->sendQ << '\n';
+	int sent = 0;
+  while((sent = sendfile(clntSock, this->fd, &offset, BUFSIZE)) > 0){
+		cerr << sent << '\n';
+	}
+	if(sent < 0){
+		cerr << strerror(errno) << '\n';
+	}
 }
 
 /************************************

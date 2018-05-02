@@ -53,10 +53,10 @@ void *HandleTCPClient(void *args){
       timeval *timeOutVal = new timeval;
       timeOutVal->tv_sec = 5;
       timeOutVal->tv_usec = 0;
-      // if(setsockopt(clntSock, SOL_SOCKET, SO_RCVTIMEO, (void *)timeOutVal, sizeof(timeOutVal)) < 0){
-      //           cerr << strerror(errno) << '\n';
-      //   DiewithMessage("Called setsockopt(): socket option set failed"); /*socket creation failed*/
-      // }
+      if(setsockopt(clntSock, SOL_SOCKET, SO_RCVTIMEO, (char *)timeOutVal, sizeof(timeOutVal)) < 0){
+                cerr << strerror(errno) << '\n';
+        DiewithMessage("Called setsockopt(): socket option set failed"); /*socket creation failed*/
+      }
 
       string addr(inet_ntoa(echoClntAddr.sin_addr));
   		cerr << "Handling client " + addr << '\n';

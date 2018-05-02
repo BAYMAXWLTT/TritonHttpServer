@@ -97,7 +97,6 @@ class Responder {
         clntSock = client;
         doc_root = root;
         this->sendQ = "";
-        this->clntSock = -1;
     };
 
     /*
