@@ -59,7 +59,7 @@ void HandleReq(int clntSock, string doc_root){
   ssize_t numBytesRcvd;
   string msg;
 
-  numBytesRcvd = recv(clntSock, buffer, BUFSIZE, MSG_DONTWAIT);
+  numBytesRcvd = recv(clntSock, buffer, BUFSIZE, 0);
   if(numBytesRcvd < 0 && (errno == EWOULDBLOCK || errno == EAGAIN)){
     /* Insert handle timeout error response */
     cerr << "time out error" << '\n';

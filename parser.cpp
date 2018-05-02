@@ -104,7 +104,6 @@ bool Parser::parse(string insstr){
 			_req.connection = val;
 			if(val.compare("close") == 0){
 				_isTerminated = true;
-				reqQ.push(_req);
 			}
 		}else{
 			/* No column*/
