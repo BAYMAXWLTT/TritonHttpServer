@@ -94,8 +94,8 @@ int Responder::verifyReq(HttpInstruction req){
   /*
     Check and set file extension
   */
-	// cerr << "before checking ext" << '\n';
-  int ext_stat = setFileType(req.url);
+	cerr << "before checking ext" << '\n';
+  // int ext_stat = setFileType(req.url);
   cerr << "set file type" << ext_stat << '\n';
   if(ext_stat != 0){
     return ext_stat;
