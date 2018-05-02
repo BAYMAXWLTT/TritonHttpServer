@@ -30,15 +30,10 @@ vector<string> Responder::parseHelper(string insstr, char del){
 }
 
 int Responder::checkFile(string path){
-	// string root(this->doc_root);
 	char *root = &(this->doc_root[0]);
 	string absolutePath(root);
 	int *res_file = &(this->fd);
-	// cerr << root << '\n';
-	cerr << absolutePath.size() << '\n';
-	cerr << absolutePath << '\n';
 
-	// absolutePath.append(root);
 	absolutePath.append(path);
 
   char resolved_t[1024];
