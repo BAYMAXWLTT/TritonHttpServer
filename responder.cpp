@@ -31,7 +31,8 @@ vector<string> Responder::parseHelper(string insstr, char del){
 
 int Responder::checkFile(string path){
 	// string root(this->doc_root);
-	string absolutePath(this->doc_root);
+	char *root = &(this->doc_root[0]);
+	string absolutePath(root);
 	int *res_file = &(this->fd);
 	// cerr << root << '\n';
 	cerr << path << '\n';
@@ -44,7 +45,7 @@ int Responder::checkFile(string path){
   string resolvedPath(resolved_t);
 	char *filePath = &resolvedPath[0];
 
-  size_t pos = resolvedPath.find(this->doc_root);
+  size_t pos = resolvedPath.find(root);
   if(pos == string::npos){
     return NOT_FOUND;
   }
