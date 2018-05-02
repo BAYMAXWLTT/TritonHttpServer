@@ -44,7 +44,7 @@ int Responder::checkFile(string path){
   string resolvedPath(resolved_t);
 	char *filePath = &resolvedPath[0];
 
-  size_t pos = resolvedPath.find(root);
+  size_t pos = resolvedPath.find(this->doc_root);
   if(pos == string::npos){
     return NOT_FOUND;
   }
