@@ -35,8 +35,8 @@ int Responder::checkFile(string path){
 	string absolutePath(root);
 	int *res_file = &(this->fd);
 	// cerr << root << '\n';
-	cerr << path.size() << '\n';
-	cerr << path << '\n';
+	cerr << absolutePath.size() << '\n';
+	cerr << absolutePath << '\n';
 
 	// absolutePath.append(root);
 	absolutePath.append(path);
@@ -65,7 +65,7 @@ int Responder::checkFile(string path){
     }
   }
 	*res_file = filed;
-	cerr << *res_file <<'\n';
+	// cerr << *res_file <<'\n';
 	return 0;
 }
 
