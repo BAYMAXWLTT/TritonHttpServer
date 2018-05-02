@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
+#include <string>
 #include <errno.h>
 #include <limits.h>
 #include "httpd.h"
