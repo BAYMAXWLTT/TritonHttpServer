@@ -34,8 +34,8 @@ int Responder::checkFile(string path){
   char *resolved_t = new char;
   realpath(&absolutePath[0], resolved_t);
   string resolvedPath(resolved_t);
-  // cerr << resolvedPath << '\n';
-  if(resolvedPath.find(this->doc_root) != string::npos){
+  cerr << resolvedPath << '\n';
+  if(resolvedPath.find(this->doc_root) == string::npos){
     return NOT_FOUND;
   }
 
