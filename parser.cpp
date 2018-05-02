@@ -4,15 +4,10 @@ Project: UCSD CSE291C Course Project: Web Server for TritonHTTP
 Author:
 1. Hou Wang
 
+Parser.cpp
 Verify the header format and parse the request into valid request data structure
 *******************************************************************************************/
 
-#include <string>
-#include <cstring>
-#include <iostream>
-#include <vector>
-#include "httpd.h"
-#include "responder.hpp"
 #include "parser.hpp"
 
 using namespace std;

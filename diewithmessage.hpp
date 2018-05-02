@@ -4,8 +4,9 @@ Project: UCSD CSE291C Course Project: Web Server for TritonHTTP
 Author:
 1. Hou Wang
 
-server:
-implementation of server start up, creating thread pool.
+diewithmessage.hpp:
+System util:
+end server if critical error is detected
 *******************************************************************************************/
 #ifndef DIEWITHMESSAGE_HPP
 #define DIEWITHMESSAGE_HPP

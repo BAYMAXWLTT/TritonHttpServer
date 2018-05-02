@@ -1,14 +1,24 @@
+/******************************************************************************************
+Project: UCSD CSE291C Course Project: Web Server for TritonHTTP
+
+Author:
+1. Hou Wang
+
+responder.cpp
+Use data flow model, responder handle file checks, permission verification and response message formatting
+
+handle reponse based on request data structure
+P2: Implement basic URL check policy, avoid client from accessing unauthorized path
+Check host
+P3: response with ERROR, response, response with body
+*******************************************************************************************/
+
+
 #include "responder.hpp"
 using namespace std;
 
-// handle reponse based on request data structure
-/* P2: Implement basic URL check policy, avoid client from accessing unauthorized path */
-/* Check host*/
-/* P3: response with ERROR, response, response with body*/
-
 /*******************************************
   Private Helpers:
-
 *******************************************/
 vector<string> Responder::parseHelper(string insstr, char del){
 	vector<string> res;
@@ -80,6 +90,7 @@ int Responder::setFileType(string path){
 
     return 0;
 }
+
 int Responder::verifyReq(HttpInstruction req){
   /*
     verify host
@@ -165,21 +176,22 @@ void Responder::appendContentLength(){
   int fs_size = (int)f_stat.st_size;
   string sz = CONTENT_LEN + to_string(fs_size);
   sz += DELIMITER;
-    this->sendQ += sz;
+  this->sendQ += sz;
 }
 
 void Responder::appendLastModified(){
   /* Append Last-Modified*/
   string lm = LAST_MOD;
   struct stat f_stat;
+	char gm[512];
+	struct tm* gmt;
+
   if(fstat(this->fd, &f_stat) < 0){
     cerr << strerror(errno) << '\n';
   }
   /* temp format: Www MMM DD HH:MM:SS YYYY*/
   time_t t = f_stat.st_mtime;
 
-  char gm[512];
-  struct tm* gmt;
   gmt = gmtime(&t);
   strftime(gm, 512, "%a, %d %b %Y %T %Z", gmt);
   string tim(gm);
@@ -194,13 +206,13 @@ void Responder::appendServ(string serv){
   string sv = SERVER;
   sv += serv;
   sv += DELIMITER;
-      this->sendQ += sv;
+  this->sendQ += sv;
 }
 
 void Responder::response(int statCode){
   off_t offset = 0;
-  const int BUFSIZE = 16384;
-  // struct stat fileStat;
+	int sent = 0;
+	struct stat f_stat;
 
   // add HTTP response initial line
   appendInitLine(statCode);
@@ -219,16 +231,12 @@ void Responder::response(int statCode){
   appendServ(SERVER_VER_NAME);
 
 	this->sendQ += DELIMITER;
-	cerr << sendQ << '\n';
-	cerr << this->fd << '\n';
 	char *header = &(this->sendQ[0]);
   if(send(clntSock, (void *)header, this->sendQ.size(), 0) < 0){
 		cerr << strerror(errno) << '\n';
 	}
 
   /* Send File as body, until EOF */
-	int sent = 0;
-	struct stat f_stat;
 	fstat(this->fd, &f_stat);
   while((sent = sendfile(clntSock, this->fd, &offset, f_stat.st_size)) > 0){
 		cerr << sent << '\n';
@@ -237,7 +245,6 @@ void Responder::response(int statCode){
 
 /************************************
   Public methods:
-
 ************************************/
 int Responder::verifyandAppendReq(HttpInstruction req){
   // check if request object is valid

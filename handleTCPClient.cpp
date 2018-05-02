@@ -13,6 +13,9 @@ Data in valid format will be passed to responser for content verification and re
 #include "handleTCPClient.hpp"
 using namespace std;
 
+/****************************************
+  Client Handler Threads for ThreadPool
+**************************************/
 void *HandleTCPClient(void *args){
       ThreadArgs *arg = static_cast<ThreadArgs *>(args);
       int servSock = arg->servSocket;

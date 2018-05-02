@@ -1,3 +1,14 @@
+/******************************************************************************************
+Project: UCSD CSE291C Course Project: Web Server for TritonHTTP
+
+Author:
+1. Hou Wang
+
+Parser.hpp: header file
+Verify the header format and parse the request into valid request data structure
+*******************************************************************************************/
+
+
 #ifndef PARSER_HPP
 #define PARSER_HPP
 
@@ -5,6 +16,10 @@
 #include <vector>
 #include <queue>
 #include <cstdint>
+#include <cstring>
+#include <iostream>
+#include <vector>
+#include "httpd.h"
 using namespace std;
 
 typedef struct HttpInstruction_t {

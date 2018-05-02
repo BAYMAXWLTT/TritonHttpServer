@@ -1,9 +1,18 @@
-#include <assert.h>
+/******************************************************************************************
+Project: UCSD CSE291C Course Project: Web Server for TritonHTTP
+
+Author:
+1. Hou Wang
+
+framer.cpp:
+framing incoming bytes stream into http packets.
+*******************************************************************************************/
 #include "framer.hpp"
-#include <iostream>
-#include <string>
 using namespace std;
 
+/***************************
+	Public Methods
+*******************************/
 void Framer::append(string chars)
 {
 	// PUT YOUR CODE HERE

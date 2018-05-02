@@ -4,8 +4,11 @@ Project: UCSD CSE291C Course Project: Web Server for TritonHTTP
 Author:
 1. Hou Wang
 
-server:
-implementation of server start up, creating thread pool.
+handTCPClient: header file
+This module handles incoming connection, and message parsing and framing.
+Handle error in data format level.
+
+Data in valid format will be passed to responser for content verification and response
 *******************************************************************************************/
 #ifndef HANDLETCPCLIENT_HPP
 #define HANDLETCPCLIENT_HPP

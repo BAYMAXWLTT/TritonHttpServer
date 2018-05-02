@@ -1,3 +1,14 @@
+/******************************************************************************************
+Project: UCSD CSE291C Course Project: Web Server for TritonHTTP
+
+Author:
+1. Hou Wang
+
+httpd.hpp:
+Concurrency: header file
+implementation of server start up, creating thread pool.
+*******************************************************************************************/
+
 #ifndef HTTPD_H
 #define HTTPD_H
 

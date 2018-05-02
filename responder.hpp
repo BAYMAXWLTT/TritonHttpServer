@@ -1,14 +1,27 @@
+/******************************************************************************************
+Project: UCSD CSE291C Course Project: Web Server for TritonHTTP
+
+Author:
+1. Hou Wang
+
+responder.cpp
+Use data flow model, responder handle file checks, permission verification and response message formatting
+
+handle reponse based on request data structure
+P2: Implement basic URL check policy, avoid client from accessing unauthorized path
+Check host
+P3: response with ERROR, response, response with body
+*******************************************************************************************/
+
 #ifndef RESPONDER_HPP
 #define RESPONDER_HPP
 
-// #include <string>
 #include <cstring>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <iostream>
-// #include <ctime>
 #include <unistd.h>
 #include <limits.h>
 #include <stdlib.h>

@@ -1,9 +1,21 @@
+/******************************************************************************************
+Project: UCSD CSE291C Course Project: Web Server for TritonHTTP
+
+Author:
+1. Hou Wang
+
+framer.hpp:
+framing incoming bytes stream into http packets. Headers
+*******************************************************************************************/
 #ifndef FRAMER_HPP
 #define FRAMER_HPP
 
 #include <vector>
 #include <string>
 #include <iostream>
+#include <iostream>
+#include <assert.h>
+#include <string>
 
 class Framer {
 public:
