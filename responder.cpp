@@ -32,7 +32,6 @@ vector<string> Responder::parseHelper(string insstr, char del){
 int Responder::checkFile(string path){
 	char *root = &(this->doc_root[0]);
 	string absolutePath(root);
-	int *res_file = &(this->fd);
 
 	absolutePath.append(path);
 
@@ -45,22 +44,23 @@ int Responder::checkFile(string path){
   if(pos == string::npos){
     return NOT_FOUND;
   }
-	cerr << filePath << '\n';
-	int filed = open(filePath, O_RDONLY);
-	cerr << filed <<'\n';
-  if(filed < 0){
-    // file open error
-    switch(errno){
-      case EACCES:
-      // permission error
-      return FORBIDDEN;
 
-      default: // ENOENT:
-      // file not exist
-      return NOT_FOUND;
-    }
-  }
-	*res_file = filed;
+	int filed = access(filePath, F_OK);
+
+  if(filed < 0){
+		if(errno == ENOENT || errno == ENOTDIR){
+			return NOT_FOUND;
+		}
+	}
+
+		struct stat f_stat;
+		stat(filePath, &f_stat);
+		if(!(f_stat.st_mode & S_IROTH)){
+			std::cout << "Forbidden" <<std::endl;
+			return FORBIDDEN;
+		}
+
+	this->fd = open(filePath, O_RDONLY);
 	return 0;
 }
 
@@ -199,7 +199,7 @@ void Responder::appendServ(string serv){
 
 void Responder::response(int statCode){
   off_t offset = 0;
-  const int BUFSIZE = 4096;
+  const int BUFSIZE = 16384;
   // struct stat fileStat;
 
   // add HTTP response initial line
@@ -228,11 +228,10 @@ void Responder::response(int statCode){
 
   /* Send File as body, until EOF */
 	int sent = 0;
-  while((sent = sendfile(clntSock, this->fd, &offset, BUFSIZE)) > 0){
+	struct stat f_stat;
+	fstat(this->fd, &f_stat);
+  while((sent = sendfile(clntSock, this->fd, &offset, f_stat.st_size)) > 0){
 		cerr << sent << '\n';
-	}
-	if(sent < 0){
-		cerr << strerror(errno) << '\n';
 	}
 }
 
