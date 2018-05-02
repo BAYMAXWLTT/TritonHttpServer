@@ -29,7 +29,7 @@ vector<string> Responder::parseHelper(string insstr, char del){
 	return res;
 }
 
-int Responder::checkFile(string path){
+int Responder::checkFile(const string path){
   string absolutePath = this->doc_root + path;
   char *resolved_t = new char;
   realpath(&absolutePath[0], resolved_t);
@@ -57,11 +57,11 @@ int Responder::checkFile(string path){
 
 int Responder::setFileType(string path){
     string ext = path.substr(path.find_last_of(".") + 1);
-    if(ext.compare("html")){
+    if(ext.compare("html") == 0){
       this->type = TEXT;
-    }else if(ext.compare("jpeg")){
+    }else if(ext.compare("jpeg") == 0){
       this->type = JPEG;
-    }else if(ext.compare("png")){
+    }else if(ext.compare("png") == 0){
       this->type = PNG;
     }else{
       // try to access file not ought to be sent
