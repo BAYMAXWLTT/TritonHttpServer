@@ -8,12 +8,14 @@ httpd.cpp:
 Concurrency:
 implementation of server start up, creating thread pool.
 *******************************************************************************************/
-
-#include <string>
-#include <iostream>
 #include "diewithmessage.hpp"
 
 void DiewithMessage(std::string msg){
   std::cerr << msg << '\n';
   exit(1);
+}
+
+void DiewithMessage_t(std::string msg){
+  std::cerr << msg <<'\n';
+  pthread_exit(1);
 }

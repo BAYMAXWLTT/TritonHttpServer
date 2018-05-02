@@ -45,7 +45,7 @@ void *HandleTCPClient(void *args){
 
       /* clntSock is connected to a client! */
   		if ((clntSock = accept(servSock, (sockaddr *) &echoClntAddr, &clntLen)) < 0){
-  			DiewithMessage("accept() failed");
+  			DiewithMessage_t("accept() failed");
       }
 
       /* set socket receive timeout */
@@ -123,6 +123,7 @@ void HandleReq(int clntSock, string doc_root){
 
   /* Connection: close detected, close socket and return */
   cerr << "reach out of loop" << '\n';
+  delete buffer;
   close(clntSock);
   return;
 }

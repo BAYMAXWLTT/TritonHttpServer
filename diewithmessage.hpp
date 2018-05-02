@@ -11,7 +11,8 @@ implementation of server start up, creating thread pool.
 #define DIEWITHMESSAGE_HPP
 
 #include <string>
-
+#include <iostream>
+#include <pthread.h>
 void DiewithMessage(std::string msg);
-
+void DiewithMessage_t(std::string msg);
 #endif // HTTPD_H
