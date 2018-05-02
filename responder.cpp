@@ -221,7 +221,8 @@ void Responder::response(int statCode, int fd, FileType type){
   send(clntSock, (void *)&sendQ[0], sendQ.size(), 0);
 
   /* Send File as body, until EOF */
-  while(sendfile(clntSock, fd, &offset, BUFSIZE) > 0);
+  int count = fileStat.st_size;
+  while(sendfile(clntSock, fd, &offset, count) > 0);
   close(fd);
   sendQ = "";
 }
