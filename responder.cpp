@@ -65,7 +65,7 @@ int Responder::checkFile(string path){
     }
   }
 	*res_file = filed;
-	// cerr << *res_file <<'\n';
+	cerr << filed <<'\n';
 	return 0;
 }
 
@@ -97,7 +97,7 @@ int Responder::verifyReq(HttpInstruction req){
     Check and set if file can be accessed
   */
   int file_stat = checkFile(req.url);
-  // cerr << "check file: " << file_stat <<'\n';
+  cerr << "check file: " << file_stat <<'\n';
   if(file_stat != 0){
     return file_stat;
   }
