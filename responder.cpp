@@ -89,7 +89,7 @@ int Responder::verifyReq(HttpInstruction req){
   /*
     Check and set if file can be accessed
   */
-
+	cerr << req.url << '\n';
   int file_stat = checkFile(req.url);
   // cerr << "check file: " << file_stat <<'\n';
   if(file_stat != 0){
