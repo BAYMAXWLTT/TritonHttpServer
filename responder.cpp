@@ -51,6 +51,7 @@ int Responder::checkFile(string path){
       return NOT_FOUND;
     }
   }
+	cerr << this->fd <<'\n';
   return 0;
 }
 
