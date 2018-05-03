@@ -1,8 +1,6 @@
-# cse291-project1
+# cse291-project1: Triton HttpServer
 
-Basic skeleton code for CSE 291's Project 1
-
-Starter code copyright (c) 2017, 2018 George Porter.  All Rights Reserved.
+Specification: https://cseweb.ucsd.edu/~gmporter/classes/sp18/cse291/post/project1/
 
 ## To build
 
@@ -22,5 +20,4 @@ Request is parsed into HttpInstruction (found in parser.cpp)
 ## Author
 Name: Hou Wang
 All rights reserved 
-=======
-# TritonHttpServer
+
